@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { VARIANTS } from '../src/catalog.ts';
-import { INK } from '../src/palettes.ts';
+import { INK, PALETTES, WHITE, type Palette } from '../src/palettes.ts';
+import { EYES } from '../src/traits/eyes.ts';
+import { MOUTHS } from '../src/traits/mouths.ts';
 import { SHAPES } from '../src/traits/shapes.ts';
-import { elementBounds, parseFragment, wellInside } from './helpers/geometry.ts';
-import { EYES_ZONE, HEAD_TOP, MOUTH_ZONE, OUTLINE_WIDTH, SHADOW_OFFSET, SHAPE_MARGIN, type Box } from './helpers/zones.ts';
+import type { Draw } from '../src/traits/types.ts';
+import { colorsOf, elementBounds, fragmentBounds, parseFragment, wellInside } from './helpers/geometry.ts';
+import { EYES_ZONE, HEAD_TOP, MOUTH_ZONE, OUTLINE_WIDTH, SHADOW_OFFSET, SHAPE_MARGIN, within, type Box } from './helpers/zones.ts';
 
 // The zone contract from docs/design.md section 5, checked for every variant.
 
@@ -34,4 +37,31 @@ for (const name of VARIANTS.shape) {
       assert.ok(wellInside(el, x, y, margin), `${name} does not clear the face zones at (${x}, ${y})`);
     }
   });
+}
+
+const paletteColors = (p: Palette): Set<string> => new Set([p.bg, p.pattern, p.body, p.accent, p.detail, INK, WHITE, 'none']);
+
+// Face features sit on the head, so they must stay in their zone and never use
+// the body color, which would make them vanish into the head.
+const checkFeature = (kind: string, name: string, draw: Draw, zone: Box) => {
+  for (const [paletteName, p] of Object.entries(PALETTES)) {
+    const svg = draw(p);
+    parseFragment(svg);
+    const b = fragmentBounds(svg);
+    assert.ok(b, `${kind} ${name} draws nothing`);
+    assert.ok(within(b, zone), `${kind} ${name} bounds ${JSON.stringify(b)} leave the zone`);
+    const allowed = paletteColors(p);
+    for (const color of colorsOf(svg)) {
+      assert.ok(allowed.has(color), `${kind} ${name} uses ${color}, which is not in palette ${paletteName}`);
+      assert.notEqual(color, p.body, `${kind} ${name} uses the body color of palette ${paletteName}`);
+    }
+  }
+};
+
+for (const name of VARIANTS.eyes) {
+  test(`eyes ${name} stay inside the eyes zone`, () => checkFeature('eyes', name, EYES[name], EYES_ZONE));
+}
+
+for (const name of VARIANTS.mouth) {
+  test(`mouth ${name} stays inside the mouth zone`, () => checkFeature('mouth', name, MOUTHS[name], MOUTH_ZONE));
 }
