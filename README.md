@@ -15,6 +15,8 @@ Same string in, same face out. Every single time.
 ![TypeScript types included](https://img.shields.io/badge/types-included-62B0EC?labelColor=111111)
 [![MIT license](https://img.shields.io/badge/license-MIT-FF6B9A?labelColor=111111)](LICENSE)
 
+**[Try the live demo →](https://waiivyy.github.io/hashface/demo/)**
+
 <img src="examples/banner.svg" alt="A crowd of eighteen hashface avatars: circles, ghosts, octagons, drops and capsules wearing crowns, horns, headphones, bows and party hats">
 
 <br>
@@ -215,7 +217,9 @@ Lock any of the eight palettes with `traits: { palette: 'mint' }`. More palette 
 
 ## Demo
 
-The repo includes a small playground: type anything, swap traits, download SVG or PNG.
+Play with it at **[waiivyy.github.io/hashface](https://waiivyy.github.io/hashface/demo/)**: type anything, swap traits, download SVG or PNG. It is a single static page with no build step, deployed by GitHub Actions on every push to `main`.
+
+To run it locally:
 
 ```bash
 npm run demo
