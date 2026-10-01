@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { CostumeName } from '../src/costumes/catalog.ts';
+import { COSTUME_NAMES, type CostumeName } from '../src/costumes/catalog.ts';
 import { COSTUMES } from '../src/costumes/costumes.ts';
 import { costumeParts, type CostumePart } from '../src/costumes/index.ts';
 
@@ -67,4 +67,25 @@ check('developer', {
   'merge-conflict': [['shape'], true],
   'not-found': [['eyes', 'mouth'], false],
   'infinite-loop': [['eyes'], true],
+});
+
+check('seasonal', {
+  snowman: [['shape', 'mouth', 'accessory', 'palette'], true],
+  'holiday-elf': [['accessory', 'palette'], false],
+  birthday: [['accessory', 'palette'], true],
+  valentine: [['eyes', 'palette'], true],
+});
+
+check('legendary', {
+  'golden-mascot': [['shape', 'eyes', 'mouth', 'accessory', 'pattern', 'palette'], true],
+  cosmic: [['eyes', 'mouth', 'pattern', 'palette'], true],
+  rainbow: [['shape', 'pattern', 'palette'], true],
+});
+
+test('the golden mascot pins all five palette colors', () => {
+  assert.deepEqual(Object.keys(COSTUMES['golden-mascot'].colors ?? {}).sort(), ['accent', 'bg', 'body', 'detail', 'pattern']);
+});
+
+test('every costume pins at least one part', () => {
+  for (const name of COSTUME_NAMES) assert.ok(costumeParts[name].length > 0, `${name} pins nothing`);
 });
