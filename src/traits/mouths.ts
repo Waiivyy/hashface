@@ -23,5 +23,5 @@ export const MOUTHS: Readonly<Record<MouthName, Draw>> = {
   smirk: () => line('M27 46C30 47.5 34.5 46 38 41.5'),
   tongue: (p) =>
     line('M25.5 42C27.5 47 36.5 47 38.5 42') +
-    `<path d="M29.5 45.4V47C29.5 49 34.5 49 34.5 47V45.4" fill="${p.detail}" stroke="${INK}" stroke-width="2"/>`,
+    `<path d="M28.8 45.2V46.8C28.8 49 35.2 49 35.2 46.8V45.2" fill="${p.detail}" stroke="${INK}" stroke-width="2"/>`,
 };

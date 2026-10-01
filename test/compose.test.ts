@@ -76,6 +76,14 @@ test('an empty title adds nothing', () => {
   assert.equal(composeSvg(t, { size: 64, title: '' }), composeSvg(t, { size: 64 }));
 });
 
+test('avatars stay small', (t) => {
+  let total = 0;
+  for (let i = 0; i < 1000; i++) total += composeSvg(selectTraits(`size-${i}`), { size: 64 }).length;
+  const mean = total / 1000;
+  t.diagnostic(`mean avatar size: ${Math.round(mean)} bytes`);
+  assert.ok(mean <= 2000, `mean avatar size ${mean} bytes`);
+});
+
 test('assertWellFormed rejects broken markup', () => {
   assertWellFormed('<svg><rect width="1" height="1"/><title>a &amp; b</title></svg>');
   for (const bad of ['<svg><rect></svg>', '<svg><title>a & b</title></svg>', '<svg>1 < 2</svg>', 'x<svg></svg>', '<svg></svg><rect/>', '<svg>', '<rect/>']) {

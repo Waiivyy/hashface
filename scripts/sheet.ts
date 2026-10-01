@@ -20,6 +20,12 @@ const categoryRows = CATEGORIES.map((category) => {
   return `<h2>${category}</h2><div class="row">${cells.join('')}</div>`;
 });
 
+// Every accessory on every head shape, to catch accessories that float or clash.
+const matrixRows = VARIANTS.accessory.map((accessory) => {
+  const cells = VARIANTS.shape.map((shape) => composeSvg(selectTraits('sheet', { accessory, shape }), { size: 96 }));
+  return `<div class="row matrix"><span>${accessory}</span>${cells.join('')}</div>`;
+});
+
 const seeds = Array.from({ length: 48 }, (_, i) => `sample-${i}`);
 const samples = seeds.map((seed) => cell(composeSvg(selectTraits(seed), { size: 96 }), seed)).join('');
 const smallSamples = seeds.map((seed) => composeSvg(selectTraits(seed), { size: 32 })).join('');
@@ -37,9 +43,12 @@ const html = `<!doctype html>
   figcaption { font-size: 12px; color: #555; }
   svg { display: block; border-radius: 10px; }
   .small svg { border-radius: 6px; }
+  .matrix { align-items: center; gap: 6px; margin-bottom: 6px; }
+  .matrix span { width: 84px; font-size: 12px; color: #555; }
 </style>
 <h1>hashface contact sheet</h1>
 ${categoryRows.join('\n')}
+<h2>accessory × shape</h2>${matrixRows.join('')}
 <h2>samples</h2><div class="row">${samples}</div>
 <h2>samples at 32px</h2><div class="row small">${smallSamples}</div>
 </html>
