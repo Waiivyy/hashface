@@ -42,6 +42,49 @@ test('composeSvg stacks the eight layers in the documented order', () => {
   }
 });
 
+test('overrides replace exactly the layers they name', () => {
+  const t = selectTraits('alice');
+  const p = PALETTES[t.palette];
+  const accessory = ACCESSORIES[t.accessory];
+  const dot = '<circle cx="32" cy="32" r="1" fill="#111111"/>';
+  const skin = '<rect x="20" y="30" width="4" height="4" fill="#FFFFFF"/>';
+  const box = (fill: string) => `<rect x="12" y="14" width="40" height="40" fill="${fill}" stroke="#111111" stroke-width="3"/>`;
+  const stripe = '<path d="M0 32H64" fill="none" stroke="#000000"/>';
+  type Parts = { pattern?: string; back?: string; shape?: (fill: string) => string; body?: string; skin?: string; eyes?: string; mouth?: string; front?: string };
+  const expected = (o: Parts) => {
+    const shape = o.shape ?? SHAPES[t.shape];
+    return (
+      ROOT_64 +
+      `<rect width="64" height="64" fill="${p.bg}"/>` +
+      (o.pattern ?? PATTERNS[t.pattern](p)) +
+      (o.back ?? accessory.back?.(p) ?? '') +
+      `<g transform="translate(3 3)">${shape(INK)}</g>` +
+      shape(o.body ?? p.body) +
+      (o.skin ?? '') +
+      (o.eyes ?? EYES[t.eyes](p)) +
+      (o.mouth ?? MOUTHS[t.mouth](p)) +
+      (o.front ?? accessory.front?.(p) ?? '') +
+      '</svg>'
+    );
+  };
+  assert.equal(composeSvg(t, { size: 64 }, { eyes: () => dot }), expected({ eyes: dot }));
+  assert.equal(composeSvg(t, { size: 64 }, { mouth: () => dot }), expected({ mouth: dot }));
+  assert.equal(composeSvg(t, { size: 64 }, { skin: () => skin }), expected({ skin }));
+  assert.equal(composeSvg(t, { size: 64 }, { shape: box }), expected({ shape: box }));
+  assert.equal(composeSvg(t, { size: 64 }, { pattern: () => stripe }), expected({ pattern: stripe }));
+  assert.equal(composeSvg(t, { size: 64 }, { colors: { body: '#123456' } }), expected({ body: '#123456' }));
+  assert.equal(composeSvg(t, { size: 64 }, { accessory: { front: () => dot } }), expected({ back: '', front: dot }));
+});
+
+test('no overrides means the core output', () => {
+  for (let i = 0; i < 200; i++) {
+    const t = selectTraits(`plain-${i}`);
+    const core = composeSvg(t, { size: 64 });
+    assert.equal(composeSvg(t, { size: 64 }, undefined), core);
+    assert.equal(composeSvg(t, { size: 64 }, {}), core);
+  }
+});
+
 test('the root element carries the documented attributes', () => {
   const t = selectTraits('alice');
   assert.ok(composeSvg(t, { size: 64 }).startsWith(ROOT_64));
@@ -72,12 +115,12 @@ test('a title is escaped and marks the svg as an image', () => {
 });
 
 test('titles are sanitized into well-formed, one-line xml', () => {
-  const XML_ILLEGAL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/;
+  const XML_ILLEGAL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/;
   const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/;
   // A display name cut in half mid-emoji, a stray low surrogate, and characters XML forbids.
-  for (const title of ['Fox \uD83E', '\uDD8A tail', 'bell\u0007', 'form\u000Cfeed', 'nul\u0000', 'bad￾']) {
+  for (const title of ['Fox \uD83E', '\uDD8A tail', 'bell\u0007', 'form\u000Cfeed', 'nul\u0000', 'bad\uFFFE']) {
     const svg = composeSvg(selectTraits('alice'), { size: 64, title });
-    assert.ok(svg.includes('�'), `${JSON.stringify(title)} was not replaced`);
+    assert.ok(svg.includes('\uFFFD'), `${JSON.stringify(title)} was not replaced`);
     assert.doesNotMatch(svg, XML_ILLEGAL);
     assert.doesNotMatch(svg, LONE_SURROGATE);
     assertWellFormed(svg);

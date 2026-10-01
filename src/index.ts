@@ -6,6 +6,7 @@
 import { VARIANTS, type TraitLocks, type Traits } from './catalog.ts';
 import { composeSvg } from './compose.ts';
 import { describeValue } from './describe.ts';
+import { normalizeOptions } from './options.ts';
 import { selectTraits } from './select.ts';
 
 export type { Category, TraitLocks, Traits } from './catalog.ts';
@@ -19,24 +20,13 @@ export interface AvatarOptions {
   readonly title?: string | undefined;
 }
 
-const DEFAULT_SIZE = 64;
-
 /**
  * Returns the avatar for `seed` as an SVG string. Seeds are hashed exactly as
  * given; normalize them first if `Alice` and `alice` should match.
  */
 export function generateAvatar(seed: string, options: AvatarOptions = {}): string {
-  if (typeof options !== 'object' || options === null) {
-    throw new TypeError(`options must be an object, got ${describeValue(options)}`);
-  }
-  const { size = DEFAULT_SIZE, traits, title } = options;
-  if (typeof size !== 'number' || !Number.isFinite(size) || size <= 0) {
-    throw new RangeError(`size must be a positive finite number, got ${describeValue(size)}`);
-  }
-  if (title !== undefined && typeof title !== 'string') {
-    throw new TypeError(`title must be a string, got ${describeValue(title)}`);
-  }
-  return composeSvg(selectTraits(seed, traits), { size, title });
+  const { size, title, traits } = normalizeOptions(options);
+  return composeSvg(selectTraits(seed, traits as TraitLocks | undefined), { size, title });
 }
 
 /** Returns the trait names `generateAvatar` would draw for `seed`, honoring any locks. */
