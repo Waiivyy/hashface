@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { contrastRatio } from './helpers/contrast.ts';
 import {
   colorsOf,
   containsPoint,
   elementBounds,
   fragmentBounds,
+  outlinePoints,
   parseFragment,
   wellInside,
   type SvgElement,
@@ -117,6 +119,40 @@ test('wellInside requires every neighbor at the margin to be inside', () => {
 
 test('colorsOf lists every fill and stroke value', () => {
   assert.deepEqual(colorsOf('<rect fill="#FFFFFF" stroke="#111111" stroke-width="3"/><circle fill="none"/>'), ['#FFFFFF', '#111111', 'none']);
+});
+
+test('outlinePoints walks the edge of each element', () => {
+  assert.deepEqual(outlinePoints(one('<rect x="10" y="20" width="4" height="6"/>')), [
+    [10, 20],
+    [14, 20],
+    [14, 26],
+    [10, 26],
+  ]);
+  const circle = outlinePoints(one('<circle cx="32" cy="32" r="5"/>'));
+  assert.equal(circle.length, 16);
+  for (const [x, y] of circle) assert.ok(Math.abs(Math.hypot(x - 32, y - 32) - 5) < 1e-9);
+  assert.deepEqual(outlinePoints(one('<line x1="1" y1="2" x2="3" y2="4" stroke="#111111"/>')), [
+    [1, 2],
+    [3, 4],
+  ]);
+  assert.deepEqual(outlinePoints(one('<polygon points="0,0 4,0 4,4"/>')), [
+    [0, 0],
+    [4, 0],
+    [4, 4],
+  ]);
+  // A rounded rect is sampled along its corners, so no point sits outside the shape.
+  const rounded = one('<rect x="0" y="0" width="20" height="20" rx="6"/>');
+  for (const [x, y] of outlinePoints(rounded)) assert.ok(containsPoint(rounded, x, y), `(${x}, ${y})`);
+  const curve = outlinePoints(one(CUBIC_CIRCLE));
+  assert.ok(curve.length > 32);
+  for (const [x, y] of curve) assert.ok(Math.abs(Math.hypot(x - 32, y - 32) - 10) < 0.05);
+});
+
+test('contrastRatio follows the WCAG formula', () => {
+  assert.equal(contrastRatio('#000000', '#FFFFFF'), 21);
+  assert.ok(Math.abs(contrastRatio('#111111', '#FFFFFF') - 18.88) < 0.01);
+  assert.equal(contrastRatio('#FFD23F', '#FFD23F'), 1);
+  assert.equal(contrastRatio('#FFFFFF', '#111111'), contrastRatio('#111111', '#FFFFFF'));
 });
 
 test('within and touches compare boxes, counting shared edges as touching', () => {

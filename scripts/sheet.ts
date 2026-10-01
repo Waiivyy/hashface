@@ -7,6 +7,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { CATEGORIES, VARIANTS, type TraitLocks } from '../src/catalog.ts';
 import { composeSvg } from '../src/compose.ts';
+import { COSTUME_NAMES } from '../src/costumes/catalog.ts';
+import { generateAvatar as costumeAvatar } from '../src/costumes/index.ts';
 import { selectTraits } from '../src/select.ts';
 
 const cell = (svg: string, label: string): string => `<figure>${svg}<figcaption>${label}</figcaption></figure>`;
@@ -25,6 +27,13 @@ const matrixRows = VARIANTS.accessory.map((accessory) => {
   const cells = VARIANTS.shape.map((shape) => composeSvg(selectTraits('sheet', { accessory, shape }), { size: 96 }));
   return `<div class="row matrix"><span>${accessory}</span>${cells.join('')}</div>`;
 });
+
+// Every costume on three seeds, to see what the seed still varies, and once at 32px.
+const costumeRows = COSTUME_NAMES.map((costume) => {
+  const cells = ['sheet-1', 'sheet-2', 'sheet-3'].map((seed) => costumeAvatar(seed, { size: 96, traits: { costume } }));
+  return `<div class="row matrix"><span>${costume}</span>${cells.join('')}</div>`;
+});
+const smallCostumes = COSTUME_NAMES.map((costume) => costumeAvatar('sheet-1', { size: 32, traits: { costume } })).join('');
 
 const seeds = Array.from({ length: 48 }, (_, i) => `sample-${i}`);
 const samples = seeds.map((seed) => cell(composeSvg(selectTraits(seed), { size: 96 }), seed)).join('');
@@ -49,6 +58,8 @@ const html = `<!doctype html>
 <h1>hashface contact sheet</h1>
 ${categoryRows.join('\n')}
 <h2>accessory × shape</h2>${matrixRows.join('')}
+<h2>costumes</h2>${costumeRows.join('')}
+<h2>costumes at 32px</h2><div class="row small">${smallCostumes}</div>
 <h2>samples</h2><div class="row">${samples}</div>
 <h2>samples at 32px</h2><div class="row small">${smallSamples}</div>
 </html>

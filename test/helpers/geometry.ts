@@ -220,6 +220,52 @@ const insideRings = (rings: readonly (readonly Point[])[], x: number, y: number)
   return inside;
 };
 
+/** Points along an element's edge: corners, vertices, or samples on curves. */
+export function outlinePoints(el: SvgElement): [number, number][] {
+  const ring = (cx: number, cy: number, rx: number, ry: number, from = 0, to = 2 * Math.PI, steps = 16): [number, number][] =>
+    Array.from({ length: steps }, (_, i): [number, number] => {
+      const a = from + ((to - from) * i) / (to === 2 * Math.PI ? steps : steps - 1);
+      return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)];
+    });
+  switch (el.tag) {
+    case 'rect': {
+      const x = num(el, 'x');
+      const y = num(el, 'y');
+      const w = num(el, 'width');
+      const h = num(el, 'height');
+      const rx = Math.min(Number(el.attrs.rx ?? el.attrs.ry ?? 0), w / 2);
+      const ry = Math.min(Number(el.attrs.ry ?? el.attrs.rx ?? 0), h / 2);
+      if (rx <= 0 || ry <= 0) return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
+      const q = Math.PI / 2;
+      return [
+        ...ring(x + rx, y + ry, rx, ry, 2 * q, 3 * q, 5),
+        ...ring(x + w - rx, y + ry, rx, ry, 3 * q, 4 * q, 5),
+        ...ring(x + w - rx, y + h - ry, rx, ry, 0, q, 5),
+        ...ring(x + rx, y + h - ry, rx, ry, q, 2 * q, 5),
+      ];
+    }
+    case 'circle':
+      return ring(num(el, 'cx'), num(el, 'cy'), num(el, 'r'), num(el, 'r'));
+    case 'ellipse':
+      return ring(num(el, 'cx'), num(el, 'cy'), num(el, 'rx'), num(el, 'ry'));
+    case 'line':
+      return [
+        [num(el, 'x1'), num(el, 'y1')],
+        [num(el, 'x2'), num(el, 'y2')],
+      ];
+    case 'polyline':
+    case 'polygon':
+      return pointList(el).map(([px, py]) => [px, py]);
+    case 'path':
+      return parsePath(el.attrs.d ?? '').rings.flat().map(([px, py]) => [px, py]);
+    default:
+      throw new Error(`unsupported element <${el.tag}>`);
+  }
+}
+
+// Points exactly on a curved edge can land a hair outside after rounding.
+const EPSILON = 1e-9;
+
 /** Whether (x, y) lies in the element's fill area. Strokes are ignored. */
 export function containsPoint(el: SvgElement, x: number, y: number): boolean {
   switch (el.tag) {
@@ -228,18 +274,18 @@ export function containsPoint(el: SvgElement, x: number, y: number): boolean {
       const top = num(el, 'y');
       const width = num(el, 'width');
       const height = num(el, 'height');
-      if (x < left || x > left + width || y < top || y > top + height) return false;
+      if (x < left - EPSILON || x > left + width + EPSILON || y < top - EPSILON || y > top + height + EPSILON) return false;
       const rx = Math.min(Number(el.attrs.rx ?? el.attrs.ry ?? 0), width / 2);
       const ry = Math.min(Number(el.attrs.ry ?? el.attrs.rx ?? 0), height / 2);
       if (rx <= 0 || ry <= 0) return true;
       const cx = Math.min(Math.max(x, left + rx), left + width - rx);
       const cy = Math.min(Math.max(y, top + ry), top + height - ry);
-      return ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+      return ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1 + EPSILON;
     }
     case 'circle':
-      return (x - num(el, 'cx')) ** 2 + (y - num(el, 'cy')) ** 2 <= num(el, 'r') ** 2;
+      return (x - num(el, 'cx')) ** 2 + (y - num(el, 'cy')) ** 2 <= num(el, 'r') ** 2 + EPSILON;
     case 'ellipse':
-      return ((x - num(el, 'cx')) / num(el, 'rx')) ** 2 + ((y - num(el, 'cy')) / num(el, 'ry')) ** 2 <= 1;
+      return ((x - num(el, 'cx')) / num(el, 'rx')) ** 2 + ((y - num(el, 'cy')) / num(el, 'ry')) ** 2 <= 1 + EPSILON;
     case 'polygon':
       return insideRings([pointList(el)], x, y);
     case 'path':
