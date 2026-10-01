@@ -1,6 +1,6 @@
 {
   "name": "hashface",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Deterministic, dependency-free SVG avatars in a bold-blocks style. Same string in, same face out.",
   "keywords": [
     "avatar",
@@ -20,12 +20,28 @@
   "license": "MIT",
   "author": "Waiivyy",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
   "engines": {
     "node": ">=18"
   },
   "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json && node scripts/fix-declarations.mjs",
+    "prepare": "npm run build",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.build.json --noEmit",
-    "test": "node --test \"test/**/*.test.ts\""
+    "test": "node --test \"test/**/*.test.ts\"",
+    "pack:check": "node scripts/pack-check.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
