@@ -25,13 +25,14 @@ interface Guest {
 
 interface Tributes {
   TRIBUTE_NAMES: readonly string[];
+  TRIBUTE_CREDITS: Readonly<Record<string, string>>;
   TRIBUTES: Readonly<Record<string, Guest>>;
   matchTribute(input: string): string | null;
   tributeSvg(name: string, size: number, title?: string): string;
 }
 
 const tributes = (await import(new URL('../demo/tributes.js', import.meta.url).href)) as Tributes;
-const { TRIBUTE_NAMES, TRIBUTES, matchTribute, tributeSvg } = tributes;
+const { TRIBUTE_NAMES, TRIBUTE_CREDITS, TRIBUTES, matchTribute, tributeSvg } = tributes;
 
 test('the guests answer to their exact names, ignoring case and surrounding spaces', () => {
   assert.deepEqual(TRIBUTE_NAMES, ['jacksepticeye', 'vanoss', 'markiplier', 'minecraft']);
@@ -81,4 +82,10 @@ test('every guest follows the fragment rules of the costumes', () => {
     }
     assert.match(guest.pattern(p), /^(<path [^<>]*\/>)?$/, `${name} pattern is one path or nothing`);
   }
+});
+
+test('every guest carries a credit line for the page', () => {
+  assert.deepEqual(Object.keys(TRIBUTE_CREDITS ?? {}), [...TRIBUTE_NAMES]);
+  for (const name of TRIBUTE_NAMES) assert.ok((TRIBUTE_CREDITS[name] ?? '').length > 10, name);
+  assert.match(TRIBUTE_CREDITS.minecraft ?? '', /Mojang Studios and Microsoft/);
 });
