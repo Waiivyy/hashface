@@ -44,10 +44,18 @@ export function pickVariant<T extends string>(word: number, names: readonly T[])
 
 const describe = (value: unknown): string => (value === null ? 'null' : typeof value);
 
+/** Shared by every unlocked call. No prototype, so a polluted Object.prototype cannot pin a trait. */
+const NO_LOCKS: TraitLocks = Object.freeze(Object.create(null) as TraitLocks);
+
+/**
+ * Returns a prototype-free copy holding only the caller's own, validated lock
+ * values. Each value is read once, so a getter cannot change it after the check.
+ */
 function validateLocks(locks: unknown): TraitLocks {
   if (typeof locks !== 'object' || locks === null) {
     throw new TypeError(`traits must be an object, got ${describe(locks)}`);
   }
+  const valid = Object.create(null) as Record<string, unknown>;
   for (const key of Object.keys(locks)) {
     // An own-property check, so inherited keys like "toString" are rejected too.
     if (!Object.prototype.hasOwnProperty.call(VARIANTS, key)) {
@@ -59,14 +67,15 @@ function validateLocks(locks: unknown): TraitLocks {
     if (!names.includes(value)) {
       throw new RangeError(`Unknown ${key} "${String(value)}". Valid ${key} values: ${names.join(', ')}`);
     }
+    valid[key] = value;
   }
-  return locks as TraitLocks;
+  return valid as TraitLocks;
 }
 
 /** Derives one variant per category from the seed, honoring any locks. */
 export function selectTraits(seed: string, locks?: TraitLocks): Traits {
   if (typeof seed !== 'string') throw new TypeError(`seed must be a string, got ${describe(seed)}`);
-  const pinned = locks === undefined ? {} : validateLocks(locks);
+  const pinned = locks === undefined ? NO_LOCKS : validateLocks(locks);
   const words = digest(seed);
   const pick = <C extends Category>(category: C): Traits[C] =>
     pinned[category] ?? pickVariant(words[WORD_INDEX[category]] ?? 0, NAMES[category]);

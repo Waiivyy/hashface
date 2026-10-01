@@ -155,6 +155,32 @@ test('invalid locks throw RangeError', () => {
   assert.throws(() => selectTraits('a', { constructor: 'x' } as never), { name: 'RangeError' });
 });
 
+test('only own, validated lock values are used', () => {
+  // Inherited values are not locks, even when they look valid.
+  assert.deepEqual(selectTraits('a', Object.create({ mouth: 'Grin' }) as never), selectTraits('a'));
+  assert.deepEqual(selectTraits('a', Object.create({ mouth: 'grin' }) as never), selectTraits('a'));
+  // A getter is read once, so the value that passed validation is the value used.
+  let reads = 0;
+  const flaky = {
+    get mouth() {
+      reads++;
+      return reads === 1 ? 'grin' : 'Grin';
+    },
+  };
+  assert.equal(selectTraits('a', flaky as never).mouth, 'grin');
+});
+
+test('a polluted Object.prototype cannot leak into selection', () => {
+  const expected = selectTraits('a');
+  Reflect.set(Object.prototype, 'shape', 'blob');
+  try {
+    assert.deepEqual(selectTraits('a'), expected);
+    assert.deepEqual(selectTraits('a', { mouth: 'grin' }), { ...expected, mouth: 'grin' });
+  } finally {
+    Reflect.deleteProperty(Object.prototype, 'shape');
+  }
+});
+
 test('a traits value that is not an object throws TypeError', () => {
   for (const bad of [null, 'mouth', 42]) {
     assert.throws(() => selectTraits('a', bad as never), { name: 'TypeError', message: /traits must be an object/ });
