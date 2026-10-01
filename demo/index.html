@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hashface: every string deserves a face</title>
+  <meta name="description" content="Deterministic, dependency-free SVG avatars in a bold-blocks style. Type anything and get a face, the same face every time.">
+  <meta name="theme-color" content="#FFD23F">
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --ink: #111111;
+      --paper: #F4EFE3;
+      --card: #FFFFFF;
+      --yellow: #FFD23F;
+      --pink: #FF6B9A;
+      --mint: #7BDFB5;
+      --blue: #62B0EC;
+      --soft-ink: #3B3A36;
+      --radius: 14px;
+      --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      font: 16px/1.5 var(--font);
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(rgb(17 17 17 / 0.09) 1.4px, transparent 1.6px);
+      background-size: 18px 18px;
+    }
+
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+    }
+
+    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+    /* Header */
+    .top {
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+      grid-template-areas: "logo title github" "tagline tagline tagline";
+      column-gap: 14px; row-gap: 12px; margin-bottom: 28px;
+    }
+    .logo {
+      grid-area: logo; width: 60px; height: 60px; overflow: hidden;
+      border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink);
+    }
+    .logo svg, .preview svg { display: block; width: 100%; height: 100%; }
+    .top h1 { grid-area: title; margin: 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -0.02em; }
+    .tagline { grid-area: tagline; margin: 0; color: var(--soft-ink); }
+    .top .github { grid-area: github; min-height: 44px; padding: 10px 14px; }
+    @media (min-width: 640px) {
+      .top { grid-template-areas: "logo title github" "logo tagline github"; row-gap: 2px; }
+      .top h1 { align-self: end; }
+      .tagline { align-self: start; }
+    }
+
+    /* Cards and buttons */
+    .card { background: var(--card); border: 3px solid var(--ink); border-radius: var(--radius); box-shadow: 6px 6px 0 var(--ink); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 48px; padding: 12px 18px;
+      font: 800 16px/1 var(--font); color: var(--ink); text-decoration: none;
+      background: var(--yellow); border: 3px solid var(--ink); border-radius: 12px;
+      box-shadow: 4px 4px 0 var(--ink); cursor: pointer;
+      transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+    }
+    .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+    .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+    .btn.mint { background: var(--mint); }
+    .btn.pink { background: var(--pink); }
+    .btn.plain { background: var(--card); }
+
+    /* Playground */
+    .playground { display: grid; gap: 24px; padding: 20px; }
+    @media (min-width: 820px) {
+      .playground { grid-template-columns: 260px 1fr; gap: 36px; align-items: start; padding: 32px; }
+    }
+    .preview {
+      width: min(260px, 100%); aspect-ratio: 1; margin: 0 auto; overflow: hidden;
+      border: 3px solid var(--ink); border-radius: 20px; box-shadow: 7px 7px 0 var(--ink);
+    }
+    .field { display: block; margin-bottom: 8px; font-size: 18px; font-weight: 800; }
+    #seed {
+      width: 100%; min-height: 56px; padding: 12px 16px;
+      font: 700 20px/1.2 var(--font); color: var(--ink);
+      background: var(--paper); border: 3px solid var(--ink); border-radius: 12px;
+    }
+    .hint { margin: 8px 0 0; color: var(--soft-ink); font-size: 15px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
+    .chip {
+      min-height: 44px; padding: 10px 14px;
+      font: 600 14px/1 var(--mono); color: var(--ink);
+      background: var(--card); border: 2px solid var(--ink); border-radius: 999px; cursor: pointer;
+    }
+    .chip span { color: var(--soft-ink); font-weight: 500; }
+    .chip b { font-weight: 700; }
+    .chip:hover { background: var(--paper); }
+    .chip[aria-pressed="true"] { background: var(--ink); color: var(--yellow); }
+    .chip[aria-pressed="true"] span { color: #D9D6CC; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+    #status:empty { display: none; }
+
+    /* Samples */
+    .section-title { margin: 44px 0 0; font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+    .samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 14px; margin-top: 16px; }
+    .sample {
+      display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0;
+      padding: 10px 6px 9px; font: 600 12px/1.2 var(--mono); color: var(--ink);
+      background: var(--card); border: 3px solid var(--ink); border-radius: 12px;
+      box-shadow: 3px 3px 0 var(--ink); cursor: pointer;
+      transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+    }
+    .sample img { display: block; width: 64px; height: 64px; border-radius: 10px; }
+    .sample span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sample:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); }
+    .sample:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+    .sample[aria-current="true"] { background: var(--yellow); }
+
+    /* Usage */
+    .usage { display: grid; gap: 12px; margin-top: 16px; padding: 20px; }
+    pre {
+      margin: 0; overflow-x: auto; padding: 14px 16px;
+      font: 14px/1.6 var(--mono); color: var(--paper); background: var(--ink); border-radius: 10px;
+    }
+    code { font-family: var(--mono); }
+
+    footer { margin-top: 48px; color: var(--soft-ink); font-size: 14px; text-align: center; }
+    footer a { color: var(--ink); font-weight: 700; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn, .sample { transition: none; }
+      .btn:hover, .btn:active, .sample:hover, .sample:active { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="logo" id="logo" aria-hidden="true"></div>
+      <h1>hashface</h1>
+      <a class="btn plain github" href="https://github.com/Waiivyy/hashface">GitHub</a>
+      <p class="tagline">Every string deserves a face. The same face, every time.</p>
+    </header>
+
+    <main>
+      <section class="card playground" aria-labelledby="play-title">
+        <h2 id="play-title" class="sr-only">Make an avatar</h2>
+        <div class="preview" id="preview"></div>
+        <div>
+          <label class="field" for="seed">Type anything</label>
+          <input id="seed" type="text" value="hashface" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <p class="hint">Usernames, emails, your cat's name. Same text in, same face out.</p>
+          <p class="hint">Not feeling the mouth? Click any trait to swap it.</p>
+          <ul class="chips" id="chips" aria-label="Traits"></ul>
+          <div class="actions">
+            <button class="btn mint" id="shuffle" type="button">Shuffle</button>
+            <button class="btn" id="download-svg" type="button">Download SVG</button>
+            <button class="btn pink" id="download-png" type="button">Download PNG</button>
+            <button class="btn plain" id="reset" type="button" hidden>Reset face</button>
+          </div>
+          <p class="hint" id="status" role="status"></p>
+          <p class="hint" id="boot">Warming up the face factory. If this stays, build it first with <code>npm run build</code>.</p>
+        </div>
+      </section>
+
+      <h2 class="section-title">Meet some strings</h2>
+      <p class="hint">Every face below is just a string. Click one to load it.</p>
+      <div class="samples" id="samples"></div>
+
+      <h2 class="section-title">Use it in your app</h2>
+      <div class="card usage">
+        <pre><code>npm install github:Waiivyy/hashface</code></pre>
+        <pre><code>import { generateAvatar } from 'hashface';
+
+const svg = generateAvatar('alice@example.com');</code></pre>
+        <p class="hint">Zero dependencies, about 6 KB gzipped, and the seed never ends up in the SVG.</p>
+      </div>
+    </main>
+
+    <footer>
+      <p>MIT licensed. Made with thick outlines and zero dependencies. <a href="https://github.com/Waiivyy/hashface">Source on GitHub</a></p>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { generateAvatar, getTraits, renderToCanvas, toDataUri, traitNames } from '../dist/index.js';
+
+    const SAMPLES = [
+      'alice', 'bob', 'carol', 'dave', 'eve', 'mallory', 'trent', 'peggy',
+      'pancake', 'thunder', 'waffles', 'noodle', 'night-owl', 'sir-quacks-a-lot', 'hello world', 'robot@example.com',
+      'user-1', 'user-2', 'tofu', 'ziggy', 'banana split', '\u{1F98A}', '\u{1F355}', 'ünïcödé',
+    ];
+    const ADJECTIVES = ['sleepy', 'turbo', 'fuzzy', 'sneaky', 'jolly', 'grumpy', 'cosmic', 'tiny', 'mighty', 'wobbly', 'spicy', 'lucky'];
+    const NOUNS = ['taco', 'noodle', 'pixel', 'otter', 'rocket', 'pickle', 'waffle', 'comet', 'goblin', 'muffin', 'robot', 'panda'];
+
+    const $ = (id) => document.getElementById(id);
+    const input = $('seed');
+    const preview = $('preview');
+    const resetButton = $('reset');
+    const status = $('status');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    // Traits pinned by clicking chips. Any new seed starts fresh.
+    let locks = {};
+
+    const pick = (list) => list[Math.floor(Math.random() * list.length)];
+    const randomSeed = () => `${pick(ADJECTIVES)}-${pick(NOUNS)}-${1 + Math.floor(Math.random() * 99)}`;
+    const slug = (seed) =>
+      seed.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'avatar';
+
+    // One chip per category, created once so keyboard focus survives re-renders.
+    const chips = Object.fromEntries(
+      Object.keys(traitNames).map((category) => {
+        const item = document.createElement('li');
+        const button = document.createElement('button');
+        const label = document.createElement('span');
+        const value = document.createElement('b');
+        button.type = 'button';
+        button.className = 'chip';
+        label.textContent = category;
+        button.append(label, ' ', value);
+        button.addEventListener('click', () => swap(category));
+        item.append(button);
+        $('chips').append(item);
+        return [category, { button, value }];
+      }),
+    );
+
+    function render() {
+      const seed = input.value;
+      const traits = getTraits(seed, locks);
+      preview.innerHTML = generateAvatar(seed, {
+        size: 260,
+        traits: locks,
+        title: seed ? `Avatar for ${seed}` : 'Avatar for the empty string',
+      });
+      for (const [category, { button, value }] of Object.entries(chips)) {
+        const locked = category in locks;
+        value.textContent = traits[category];
+        button.setAttribute('aria-pressed', String(locked));
+        button.setAttribute('aria-label', `${category}: ${traits[category]}${locked ? ', swapped' : ''}. Swap to the next one.`);
+      }
+      resetButton.hidden = Object.keys(locks).length === 0;
+      for (const sample of document.querySelectorAll('.sample')) {
+        sample.setAttribute('aria-current', String(sample.dataset.seed === seed));
+      }
+      status.textContent = '';
+    }
+
+    function swap(category) {
+      const names = traitNames[category];
+      const current = getTraits(input.value, locks)[category];
+      locks = { ...locks, [category]: names[(names.indexOf(current) + 1) % names.length] };
+      render();
+    }
+
+    function useSeed(seed) {
+      input.value = seed;
+      locks = {};
+      render();
+    }
+
+    function download(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = Object.assign(document.createElement('a'), { href: url, download: filename });
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    input.addEventListener('input', () => {
+      locks = {};
+      render();
+    });
+
+    $('shuffle').addEventListener('click', () => useSeed(randomSeed()));
+
+    resetButton.addEventListener('click', () => {
+      locks = {};
+      render();
+      input.focus();
+    });
+
+    $('download-svg').addEventListener('click', () => {
+      const svg = generateAvatar(input.value, { size: 512, traits: locks });
+      download(new Blob([svg], { type: 'image/svg+xml' }), `hashface-${slug(input.value)}.svg`);
+    });
+
+    $('download-png').addEventListener('click', async () => {
+      try {
+        const canvas = Object.assign(document.createElement('canvas'), { width: 512, height: 512 });
+        await renderToCanvas(canvas, generateAvatar(input.value, { size: 512, traits: locks }));
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('the browser could not encode a PNG');
+        download(blob, `hashface-${slug(input.value)}.png`);
+      } catch (error) {
+        status.textContent = `Could not make a PNG: ${error.message}. The SVG download still works.`;
+      }
+    });
+
+    for (const seed of SAMPLES) {
+      const button = document.createElement('button');
+      const image = document.createElement('img');
+      const label = document.createElement('span');
+      button.type = 'button';
+      button.className = 'sample';
+      button.dataset.seed = seed;
+      button.setAttribute('aria-label', `Load the avatar for ${seed}`);
+      Object.assign(image, { src: toDataUri(generateAvatar(seed, { size: 64 })), alt: '', width: 64, height: 64 });
+      label.textContent = seed;
+      button.append(image, label);
+      button.addEventListener('click', () => {
+        useSeed(seed);
+        preview.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'nearest' });
+      });
+      $('samples').append(button);
+    }
+
+    $('logo').innerHTML = generateAvatar('hashface', { size: 60 });
+    document.querySelector('link[rel="icon"]').href = toDataUri(generateAvatar('hashface', { size: 64 }));
+    $('boot').remove();
+    render();
+  </script>
+</body>
+</html>
