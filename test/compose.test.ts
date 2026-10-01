@@ -71,6 +71,23 @@ test('a title is escaped and marks the svg as an image', () => {
   assertWellFormed(svg);
 });
 
+test('titles are sanitized into well-formed, one-line xml', () => {
+  const XML_ILLEGAL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/;
+  const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+  // A display name cut in half mid-emoji, a stray low surrogate, and characters XML forbids.
+  for (const title of ['Fox \uD83E', '\uDD8A tail', 'bell\u0007', 'form\u000Cfeed', 'nul\u0000', 'bad￾']) {
+    const svg = composeSvg(selectTraits('alice'), { size: 64, title });
+    assert.ok(svg.includes('�'), `${JSON.stringify(title)} was not replaced`);
+    assert.doesNotMatch(svg, XML_ILLEGAL);
+    assert.doesNotMatch(svg, LONE_SURROGATE);
+    assertWellFormed(svg);
+  }
+  const multiline = composeSvg(selectTraits('alice'), { size: 64, title: 'a\nb\tc\rd' });
+  assert.ok(multiline.includes('<title>a&#10;b&#9;c&#13;d</title>'));
+  assert.doesNotMatch(multiline, /[\n\r\t]/);
+  assert.ok(composeSvg(selectTraits('alice'), { size: 64, title: 'fox \u{1F98A}' }).includes('<title>fox \u{1F98A}</title>'));
+});
+
 test('an empty title adds nothing', () => {
   const t = selectTraits('alice');
   assert.equal(composeSvg(t, { size: 64, title: '' }), composeSvg(t, { size: 64 }));

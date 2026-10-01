@@ -26,9 +26,19 @@ const XML_ESCAPES: Readonly<Record<string, string>> = {
   '>': '&gt;',
   '"': '&quot;',
   "'": '&apos;',
+  '\t': '&#9;',
+  '\n': '&#10;',
+  '\r': '&#13;',
 };
 
-export const escapeXml = (text: string): string => text.replace(/[&<>"']/g, (c) => XML_ESCAPES[c] ?? c);
+// A valid surrogate pair matches first and is kept. A lone surrogate, or a
+// character XML forbids, becomes U+FFFD. (No lookbehind: older Safari can't parse it.)
+const XML_UNSAFE =
+  /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]|[&<>"'\t\n\r]/g;
+
+/** Escapes text for XML content, keeping the output well-formed and on one line. */
+export const escapeXml = (text: string): string =>
+  text.replace(XML_UNSAFE, (c) => (c.length === 2 ? c : (XML_ESCAPES[c] ?? '�')));
 
 export function composeSvg(traits: Traits, options: ComposeOptions): string {
   const p = PALETTES[traits.palette];
