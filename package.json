@@ -42,7 +42,8 @@
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.build.json --noEmit",
     "test": "node --test \"test/**/*.test.ts\"",
     "pack:check": "node scripts/pack-check.ts",
-    "demo": "npm run build && node scripts/serve.ts"
+    "demo": "npm run build && node scripts/serve.ts",
+    "site": "npm run build && node scripts/site.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
