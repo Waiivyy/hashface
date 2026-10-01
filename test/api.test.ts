@@ -74,8 +74,13 @@ test('toDataUri round-trips', () => {
   assert.ok(uri.startsWith(prefix));
   const rest = uri.slice(prefix.length);
   assert.equal(decodeURIComponent(rest), svg);
-  assert.doesNotMatch(rest, /[#<"]/);
+  // Nothing that would end an unquoted CSS url() or an attribute value.
+  assert.doesNotMatch(rest, /[#<"()']/);
   assert.throws(() => toDataUri(undefined as never), { name: 'TypeError', message: /svg must be a string/ });
+});
+
+test('toDataUri accepts any title, even a broken surrogate', () => {
+  assert.doesNotThrow(() => toDataUri(generateAvatar('alice', { title: 'Fox \u{1F98A}'.slice(0, 5) })));
 });
 
 // A browser stand-in: records the image source, the decode, and the canvas calls.

@@ -48,10 +48,14 @@ export function getTraits(seed: string, locks?: TraitLocks): Traits {
 /** Every variant name per category, in catalog order. Frozen. */
 export const traitNames: typeof VARIANTS = VARIANTS;
 
-/** Wraps an SVG string in a data URI, ready for `<img src>` or CSS `url()`. */
+// encodeURIComponent leaves these alone, but they would end an unquoted CSS url().
+const URI_EXTRA = /[!'()*]/g;
+
+/** Wraps an SVG string in a data URI, ready for `<img src>` or CSS `url()`, quoted or not. */
 export function toDataUri(svg: string): string {
   if (typeof svg !== 'string') throw new TypeError(`svg must be a string, got ${describe(svg)}`);
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  const encoded = encodeURIComponent(svg).replace(URI_EXTRA, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+  return `data:image/svg+xml;charset=utf-8,${encoded}`;
 }
 
 /** The parts of a 2d canvas context that renderToCanvas uses. */
