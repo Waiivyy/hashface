@@ -2,12 +2,26 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { VARIANTS } from '../src/catalog.ts';
 import { INK, PALETTES, WHITE, type Palette } from '../src/palettes.ts';
+import { ACCESSORIES } from '../src/traits/accessories.ts';
 import { EYES } from '../src/traits/eyes.ts';
 import { MOUTHS } from '../src/traits/mouths.ts';
+import { PATTERNS } from '../src/traits/patterns.ts';
 import { SHAPES } from '../src/traits/shapes.ts';
 import type { Draw } from '../src/traits/types.ts';
 import { colorsOf, elementBounds, fragmentBounds, parseFragment, wellInside } from './helpers/geometry.ts';
-import { EYES_ZONE, HEAD_TOP, MOUTH_ZONE, OUTLINE_WIDTH, SHADOW_OFFSET, SHAPE_MARGIN, within, type Box } from './helpers/zones.ts';
+import {
+  CANVAS,
+  CROWN_REACH_Y,
+  EYES_ZONE,
+  HEAD_TOP,
+  MOUTH_ZONE,
+  OUTLINE_WIDTH,
+  SHADOW_OFFSET,
+  SHAPE_MARGIN,
+  touches,
+  within,
+  type Box,
+} from './helpers/zones.ts';
 
 // The zone contract from docs/design.md section 5, checked for every variant.
 
@@ -64,4 +78,48 @@ for (const name of VARIANTS.eyes) {
 
 for (const name of VARIANTS.mouth) {
   test(`mouth ${name} stays inside the mouth zone`, () => checkFeature('mouth', name, MOUTHS[name], MOUTH_ZONE));
+}
+
+test('accessory none draws nothing', () => {
+  assert.deepEqual(ACCESSORIES.none, {});
+});
+
+// Back parts sit behind the head, which always covers both face zones, so only
+// front parts must keep clear of the face.
+for (const name of VARIANTS.accessory.filter((n) => n !== 'none')) {
+  test(`accessory ${name} keeps clear of the face and rests on the head`, () => {
+    for (const [paletteName, p] of Object.entries(PALETTES)) {
+      const back = ACCESSORIES[name].back?.(p) ?? '';
+      const front = ACCESSORIES[name].front?.(p) ?? '';
+      assert.ok(back !== '' || front !== '', `${name} draws nothing`);
+      parseFragment(back);
+      for (const el of parseFragment(front)) {
+        const b = elementBounds(el, { stroke: true });
+        assert.ok(!touches(b, EYES_ZONE) && !touches(b, MOUTH_ZONE), `${name} front part ${JSON.stringify(b)} covers the face`);
+      }
+      const union = fragmentBounds(back + front);
+      assert.ok(union && within(union, CANVAS), `${name} leaves the canvas: ${JSON.stringify(union)}`);
+      assert.ok(union.y1 >= CROWN_REACH_Y, `${name} ends at y ${union.y1}, above the lowest head top`);
+      const allowed = paletteColors(p);
+      for (const color of colorsOf(back + front)) {
+        assert.ok(allowed.has(color), `${name} uses ${color}, which is not in palette ${paletteName}`);
+      }
+    }
+  });
+}
+
+test('pattern none draws nothing', () => {
+  for (const p of Object.values(PALETTES)) assert.equal(PATTERNS.none(p), '');
+});
+
+for (const name of VARIANTS.pattern.filter((n) => n !== 'none')) {
+  test(`pattern ${name} is one path in the pattern color`, () => {
+    for (const p of Object.values(PALETTES)) {
+      const svg = PATTERNS[name](p);
+      assert.match(svg, /^<path [^<>]*\/>$/);
+      const colors = colorsOf(svg);
+      assert.ok(colors.includes(p.pattern), `${name} does not use the pattern color`);
+      for (const color of colors) assert.ok(color === p.pattern || color === 'none', `${name} uses ${color}`);
+    }
+  });
 }
