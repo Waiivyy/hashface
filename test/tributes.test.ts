@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { traitNames } from '../src/costumes/index.ts';
+import { INK, WHITE } from '../src/palettes.ts';
+import { colorsOf, parseFragment } from './helpers/geometry.ts';
 import { assertWellFormed } from './helpers/xml.ts';
 
 // The demo's special guests (docs/costumes.md section 8). demo/tributes.js is
@@ -45,5 +47,22 @@ test('the guests render as well-formed svg and stay out of the costume catalog',
     assert.ok(svg.includes(`<title>Special guest: ${name}</title>`));
     assert.equal(tributeSvg(name, 128, `Special guest: ${name}`), svg, 'the same picture every time');
     assert.ok(!(traitNames.costume as readonly string[]).includes(name), `${name} is not a costume`);
+  }
+});
+
+test('every guest follows the fragment rules of the costumes', () => {
+  for (const name of TRIBUTE_NAMES) {
+    const guest = TRIBUTES[name] as Record<string, (arg: unknown) => string> & { colors: Record<string, string> };
+    const p = guest.colors;
+    const allowed = new Set([...Object.values(p), INK, WHITE, 'none']);
+    const parts: [string, string][] = [
+      ['shape', guest.shape('#ABCDEF')],
+      ...(['skin', 'eyes', 'mouth', 'back', 'front'] as const).map((part): [string, string] => [part, guest[part](p)]),
+    ];
+    for (const [part, svg] of parts) {
+      assert.doesNotThrow(() => parseFragment(svg), `${name} ${part}`);
+      for (const color of colorsOf(svg)) assert.ok(allowed.has(color) || (part === 'shape' && color === '#ABCDEF'), `${name} ${part} uses ${color}`);
+    }
+    assert.match(guest.pattern(p), /^(<path [^<>]*\/>)?$/, `${name} pattern is one path or nothing`);
   }
 });

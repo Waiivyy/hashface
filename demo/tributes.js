@@ -14,8 +14,13 @@ const ink = (width) => `stroke="${INK}" stroke-width="${width}"`;
 const nothing = () => '';
 
 // A Creeper face is an 8 by 8 grid of 5-unit pixels over the head at (12, 14).
-const pixels = (cells, color) =>
-  `<path d="${cells.map(([row, col]) => `M${12 + 5 * col} ${14 + 5 * row}h5v5h-5z`).join('')}" fill="${color}"/>`;
+const pixels = (cells, color) => {
+  const squares = cells.map(([row, col]) => {
+    const [x, y] = [12 + 5 * col, 14 + 5 * row];
+    return `M${x} ${y}H${x + 5}V${y + 5}H${x}Z`;
+  });
+  return `<path d="${squares.join('')}" fill="${color}"/>`;
+};
 
 export const TRIBUTES = Object.freeze({
   // Jacksepticeye's green eyeball.
