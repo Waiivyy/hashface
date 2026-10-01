@@ -7,6 +7,7 @@
  */
 
 import { CATEGORIES, VARIANTS, type Category, type TraitLocks, type Traits } from './catalog.ts';
+import { describeValue } from './describe.ts';
 import { digest, fnv1a32, mix32 } from './hash.ts';
 
 /** The digest word each category reads. */
@@ -42,8 +43,6 @@ export function pickVariant<T extends string>(word: number, names: readonly T[])
   return best;
 }
 
-const describe = (value: unknown): string => (value === null ? 'null' : typeof value);
-
 /** Shared by every unlocked call. No prototype, so a polluted Object.prototype cannot pin a trait. */
 const NO_LOCKS: TraitLocks = Object.freeze(Object.create(null) as TraitLocks);
 
@@ -53,7 +52,7 @@ const NO_LOCKS: TraitLocks = Object.freeze(Object.create(null) as TraitLocks);
  */
 function validateLocks(locks: unknown): TraitLocks {
   if (typeof locks !== 'object' || locks === null) {
-    throw new TypeError(`traits must be an object, got ${describe(locks)}`);
+    throw new TypeError(`traits must be an object, got ${describeValue(locks)}`);
   }
   const valid = Object.create(null) as Record<string, unknown>;
   for (const key of Object.keys(locks)) {
@@ -65,7 +64,8 @@ function validateLocks(locks: unknown): TraitLocks {
     if (value === undefined) continue;
     const names: readonly unknown[] = VARIANTS[key as Category];
     if (!names.includes(value)) {
-      throw new RangeError(`Unknown ${key} "${String(value)}". Valid ${key} values: ${names.join(', ')}`);
+      const shown = typeof value === 'string' ? JSON.stringify(value) : describeValue(value);
+      throw new RangeError(`Unknown ${key} ${shown}. Valid ${key} values: ${names.join(', ')}`);
     }
     valid[key] = value;
   }
@@ -74,7 +74,7 @@ function validateLocks(locks: unknown): TraitLocks {
 
 /** Derives one variant per category from the seed, honoring any locks. */
 export function selectTraits(seed: string, locks?: TraitLocks): Traits {
-  if (typeof seed !== 'string') throw new TypeError(`seed must be a string, got ${describe(seed)}`);
+  if (typeof seed !== 'string') throw new TypeError(`seed must be a string, got ${describeValue(seed)}`);
   const pinned = locks === undefined ? NO_LOCKS : validateLocks(locks);
   const words = digest(seed);
   const pick = <C extends Category>(category: C): Traits[C] =>

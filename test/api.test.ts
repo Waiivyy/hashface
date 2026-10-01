@@ -23,12 +23,29 @@ test('size only changes width and height', () => {
 });
 
 test('invalid sizes throw RangeError', () => {
-  for (const bad of [0, -1, Number.NaN, Number.POSITIVE_INFINITY, '64', null]) {
+  for (const bad of [0, -1, Number.NaN, Number.POSITIVE_INFINITY, '64', null, Object.create(null), ['64']]) {
     assert.throws(() => generateAvatar('alice', { size: bad as never }), {
       name: 'RangeError',
       message: /size must be a positive finite number/,
     });
   }
+});
+
+test('error messages say what was actually passed', () => {
+  const sizeMessage = (size: unknown) => {
+    try {
+      generateAvatar('alice', { size: size as never });
+    } catch (error) {
+      return (error as Error).message;
+    }
+    return '';
+  };
+  assert.match(sizeMessage('64'), /got string "64"$/);
+  assert.match(sizeMessage(Number.NaN), /got number NaN$/);
+  assert.match(sizeMessage(null), /got null$/);
+  assert.match(sizeMessage(['64']), /got array$/);
+  assert.match(sizeMessage(Object.create(null)), /got object$/);
+  assert.throws(() => generateAvatar(42 as never), { message: /seed must be a string, got number 42/ });
 });
 
 test('non-string seeds and titles throw TypeError', () => {

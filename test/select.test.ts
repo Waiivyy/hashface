@@ -146,7 +146,10 @@ test('invalid locks throw RangeError', () => {
     name: 'RangeError',
     message: /Unknown mouth "Grin"\. Valid mouth values: smile, flat, open/,
   });
-  assert.throws(() => selectTraits('a', { mouth: null } as never), { name: 'RangeError', message: /Unknown mouth "null"/ });
+  // Non-string values are described by type, so null is not mistaken for the text "null".
+  assert.throws(() => selectTraits('a', { mouth: null } as never), { name: 'RangeError', message: /Unknown mouth null\. Valid mouth values/ });
+  assert.throws(() => selectTraits('a', { mouth: ['grin'] } as never), { name: 'RangeError', message: /Unknown mouth array\. Valid mouth values/ });
+  assert.throws(() => selectTraits('a', { mouth: Object.create(null) } as never), { name: 'RangeError', message: /Unknown mouth object\./ });
   assert.throws(() => selectTraits('a', { hat: 'x' } as never), {
     name: 'RangeError',
     message: /Unknown trait category "hat"\. Valid categories: shape, eyes, mouth, accessory, palette, pattern/,

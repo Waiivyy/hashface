@@ -5,6 +5,7 @@
 
 import { VARIANTS, type TraitLocks, type Traits } from './catalog.ts';
 import { composeSvg } from './compose.ts';
+import { describeValue } from './describe.ts';
 import { selectTraits } from './select.ts';
 
 export type { Category, TraitLocks, Traits } from './catalog.ts';
@@ -20,22 +21,20 @@ export interface AvatarOptions {
 
 const DEFAULT_SIZE = 64;
 
-const describe = (value: unknown): string => (value === null ? 'null' : typeof value);
-
 /**
  * Returns the avatar for `seed` as an SVG string. Seeds are hashed exactly as
  * given; normalize them first if `Alice` and `alice` should match.
  */
 export function generateAvatar(seed: string, options: AvatarOptions = {}): string {
   if (typeof options !== 'object' || options === null) {
-    throw new TypeError(`options must be an object, got ${describe(options)}`);
+    throw new TypeError(`options must be an object, got ${describeValue(options)}`);
   }
   const { size = DEFAULT_SIZE, traits, title } = options;
   if (typeof size !== 'number' || !Number.isFinite(size) || size <= 0) {
-    throw new RangeError(`size must be a positive finite number, got ${String(size)}`);
+    throw new RangeError(`size must be a positive finite number, got ${describeValue(size)}`);
   }
   if (title !== undefined && typeof title !== 'string') {
-    throw new TypeError(`title must be a string, got ${describe(title)}`);
+    throw new TypeError(`title must be a string, got ${describeValue(title)}`);
   }
   return composeSvg(selectTraits(seed, traits), { size, title });
 }
@@ -53,7 +52,7 @@ const URI_EXTRA = /[!'()*]/g;
 
 /** Wraps an SVG string in a data URI, ready for `<img src>` or CSS `url()`, quoted or not. */
 export function toDataUri(svg: string): string {
-  if (typeof svg !== 'string') throw new TypeError(`svg must be a string, got ${describe(svg)}`);
+  if (typeof svg !== 'string') throw new TypeError(`svg must be a string, got ${describeValue(svg)}`);
   const encoded = encodeURIComponent(svg).replace(URI_EXTRA, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
   return `data:image/svg+xml;charset=utf-8,${encoded}`;
 }
