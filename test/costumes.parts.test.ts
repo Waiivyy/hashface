@@ -35,3 +35,20 @@ check('spooky', {
   skeleton: [['eyes', 'mouth', 'palette'], true],
   alien: [['eyes', 'accessory', 'palette'], false],
 });
+
+check('animals', {
+  cat: [['accessory'], true],
+  frog: [['shape', 'mouth', 'palette'], false],
+  panda: [['eyes', 'accessory', 'palette'], true],
+  fox: [['accessory', 'palette'], true],
+  penguin: [['eyes', 'mouth', 'palette'], true],
+  bunny: [['mouth', 'accessory'], false],
+});
+
+check('food', {
+  pizza: [['shape', 'palette'], true],
+  donut: [['shape', 'palette'], true],
+  taco: [['shape', 'accessory', 'palette'], false],
+  avocado: [['shape', 'palette'], true],
+  cupcake: [['shape', 'accessory', 'palette'], true],
+});
