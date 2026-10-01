@@ -9,9 +9,23 @@ import { assertWellFormed } from './helpers/xml.ts';
 // plain JS that the page loads straight from ../dist, so this test needs a
 // build first: npm run build.
 
+type Colors = Readonly<Record<string, string>>;
+type Part = (p: Colors) => string;
+
+interface Guest {
+  shape(fill: string): string;
+  skin: Part;
+  eyes: Part;
+  mouth: Part;
+  back: Part;
+  front: Part;
+  pattern: Part;
+  colors: Colors;
+}
+
 interface Tributes {
   TRIBUTE_NAMES: readonly string[];
-  TRIBUTES: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
+  TRIBUTES: Readonly<Record<string, Guest>>;
   matchTribute(input: string): string | null;
   tributeSvg(name: string, size: number, title?: string): string;
 }
@@ -33,9 +47,10 @@ test('the guests answer to their exact names, ignoring case and surrounding spac
 test('every guest is fully pinned', () => {
   const FIELDS = ['shape', 'skin', 'eyes', 'mouth', 'back', 'front', 'pattern', 'colors'];
   for (const name of TRIBUTE_NAMES) {
-    const guest = TRIBUTES[name] ?? {};
+    const guest = TRIBUTES[name];
+    assert.ok(guest, name);
     assert.deepEqual(Object.keys(guest).sort(), [...FIELDS].sort(), name);
-    assert.deepEqual(Object.keys(guest.colors as object).sort(), ['accent', 'bg', 'body', 'detail', 'pattern'], name);
+    assert.deepEqual(Object.keys(guest.colors).sort(), ['accent', 'bg', 'body', 'detail', 'pattern'], name);
   }
 });
 
@@ -52,7 +67,8 @@ test('the guests render as well-formed svg and stay out of the costume catalog',
 
 test('every guest follows the fragment rules of the costumes', () => {
   for (const name of TRIBUTE_NAMES) {
-    const guest = TRIBUTES[name] as Record<string, (arg: unknown) => string> & { colors: Record<string, string> };
+    const guest = TRIBUTES[name];
+    assert.ok(guest, name);
     const p = guest.colors;
     const allowed = new Set([...Object.values(p), INK, WHITE, 'none']);
     const parts: [string, string][] = [
