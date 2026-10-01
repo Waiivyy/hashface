@@ -301,6 +301,8 @@ Adding a variant? Draw it in `src/traits/`, keep it inside its zone (the zone te
 
 [MIT](LICENSE) © 2026 Waiivyy
 
+The live demo also hosts a few fan tributes. They belong to their creators, are not covered by the MIT license and are not part of the package; see [demo/CREDITS.md](demo/CREDITS.md).
+
 <div align="center">
 <br>
 <img src="examples/eve.svg" width="44" alt=""> <img src="examples/carol.svg" width="44" alt=""> <img src="examples/dave.svg" width="44" alt="">

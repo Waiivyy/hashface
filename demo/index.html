@@ -51,9 +51,22 @@
       column-gap: 14px; row-gap: 12px; margin-bottom: 28px;
     }
     .logo {
-      grid-area: logo; width: 60px; height: 60px; overflow: hidden;
+      grid-area: logo; width: 60px; height: 60px; overflow: hidden; padding: 0;
+      font: inherit; color: inherit; background: none; cursor: pointer;
       border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink);
     }
+    .logo.wiggle { animation: wiggle 450ms ease-in-out; }
+    @keyframes wiggle {
+      20% { transform: rotate(-10deg) scale(1.06); }
+      45% { transform: rotate(8deg) scale(1.06); }
+      70% { transform: rotate(-5deg); }
+      100% { transform: none; }
+    }
+    .party-note {
+      margin: -12px 0 24px; padding: 12px 16px; font-weight: 700;
+      background: var(--pink); border: 3px solid var(--ink); border-radius: 12px; box-shadow: 4px 4px 0 var(--ink);
+    }
+    .party-note:empty { margin: 0; padding: 0; border: 0; box-shadow: none; }
     .logo svg, .preview svg { display: block; width: 100%; height: 100%; }
     .top h1 { grid-area: title; margin: 0; font-size: 32px; line-height: 1.05; font-weight: 800; letter-spacing: -0.02em; }
     .tagline { grid-area: tagline; margin: 0; color: var(--soft-ink); }
@@ -108,6 +121,8 @@
     .chip:hover { background: var(--paper); }
     .chip[aria-pressed="true"] { background: var(--ink); color: var(--yellow); }
     .chip[aria-pressed="true"] span { color: #D9D6CC; }
+    .chip[data-covered] { border-style: dashed; }
+    .chip:disabled { cursor: default; opacity: 0.6; }
     .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
     #status:empty { display: none; }
 
@@ -140,6 +155,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .btn, .sample { transition: none; }
+      .logo.wiggle { animation: none; }
       .btn:hover, .btn:active, .sample:hover, .sample:active { transform: none; }
     }
   </style>
@@ -147,11 +163,12 @@
 <body>
   <div class="wrap">
     <header class="top">
-      <div class="logo" id="logo" aria-hidden="true"></div>
+      <button class="logo" id="logo" type="button" aria-label="hashface"></button>
       <h1>hashface</h1>
       <a class="btn plain github" href="https://github.com/Waiivyy/hashface">GitHub</a>
       <p class="tagline">Every string deserves a face. The same face, every time.</p>
     </header>
+    <p class="party-note" id="party-note" role="status"></p>
 
     <main>
       <section class="card playground" aria-labelledby="play-title">
@@ -194,13 +211,17 @@ const svg = generateAvatar('alice@example.com');</code></pre>
   </div>
 
   <script type="module">
-    import { generateAvatar, getTraits, renderToCanvas, toDataUri, traitNames } from '../dist/index.js';
+    import * as core from '../dist/index.js';
+
+    const { renderToCanvas, toDataUri } = core;
 
     const SAMPLES = [
       'alice', 'bob', 'carol', 'dave', 'eve', 'mallory', 'trent', 'peggy',
       'pancake', 'thunder', 'waffles', 'noodle', 'night-owl', 'sir-quacks-a-lot', 'hello world', 'robot@example.com',
-      'user-1', 'user-2', 'tofu', 'ziggy', 'banana split', '\u{1F98A}', '\u{1F355}', '\u00FCn\u00EFc\u00F6d\u00E9',
+      'user-1', 'user-2', 'tofu', 'ziggy', 'banana split', '\u{1F98A}', '\u{1F355}', 'ünïcödé',
     ];
+    // How many seeds that roll a costume join the samples during the costume party.
+    const PARTY_SAMPLES = 6;
     const ADJECTIVES = ['sleepy', 'turbo', 'fuzzy', 'sneaky', 'jolly', 'grumpy', 'cosmic', 'tiny', 'mighty', 'wobbly', 'spicy', 'lucky'];
     const NOUNS = ['taco', 'noodle', 'pixel', 'otter', 'rocket', 'pickle', 'waffle', 'comet', 'goblin', 'muffin', 'robot', 'panda'];
 
@@ -209,10 +230,18 @@ const svg = generateAvatar('alice@example.com');</code></pre>
     const preview = $('preview');
     const resetButton = $('reset');
     const status = $('status');
+    const logo = $('logo');
+    const partyNote = $('party-note');
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
     // Traits pinned by clicking chips. Any new seed starts fresh.
     let locks = {};
+    // While costume party mode is on: the costume entry point and the special guests.
+    let party = null;
+    let guests = null;
+
+    const api = () => party ?? core;
+    const guestFor = (seed) => (party && guests ? guests.matchTribute(seed) : null);
 
     const pick = (list) => list[Math.floor(Math.random() * list.length)];
     const randomSeed = () => `${pick(ADJECTIVES)}-${pick(NOUNS)}-${1 + Math.floor(Math.random() * 99)}`;
@@ -220,8 +249,9 @@ const svg = generateAvatar('alice@example.com');</code></pre>
       seed.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'avatar';
 
     // One chip per category, created once so keyboard focus survives re-renders.
+    // The costume chip only shows during the costume party.
     const chips = Object.fromEntries(
-      Object.keys(traitNames).map((category) => {
+      [...Object.keys(core.traitNames), 'costume'].map((category) => {
         const item = document.createElement('li');
         const button = document.createElement('button');
         const label = document.createElement('span');
@@ -233,23 +263,37 @@ const svg = generateAvatar('alice@example.com');</code></pre>
         button.addEventListener('click', () => swap(category));
         item.append(button);
         $('chips').append(item);
-        return [category, { button, value }];
+        return [category, { item, button, value }];
       }),
     );
 
+    // The current face as SVG: a special guest, or the seed through whichever entry point is active.
+    function avatarSvg(size, title) {
+      const guest = guestFor(input.value);
+      if (guest) return guests.tributeSvg(guest, size, title);
+      return api().generateAvatar(input.value, { size, traits: locks, title });
+    }
+
     function render() {
       const seed = input.value;
-      const traits = getTraits(seed, locks);
-      preview.innerHTML = generateAvatar(seed, {
-        size: 260,
-        traits: locks,
-        title: seed ? `Avatar for ${seed}` : 'Avatar for the empty string',
-      });
-      for (const [category, { button, value }] of Object.entries(chips)) {
+      const guest = guestFor(seed);
+      const traits = api().getTraits(seed, locks);
+      const covered = party && traits.costume !== 'none' ? party.costumeParts[traits.costume] : [];
+      preview.innerHTML = avatarSvg(
+        260,
+        guest ? `Special guest: ${guest}` : seed ? `Avatar for ${seed}` : 'Avatar for the empty string',
+      );
+      for (const [category, { item, button, value }] of Object.entries(chips)) {
+        item.hidden = category === 'costume' && !party;
+        if (item.hidden) continue;
         const locked = category in locks;
-        value.textContent = traits[category];
+        const shown = guest ? 'special guest' : covered.includes(category) ? 'from costume' : traits[category];
+        const under = shown === traits[category] ? '' : ` (${traits[category]} underneath)`;
+        value.textContent = shown;
+        button.disabled = guest !== null;
+        button.toggleAttribute('data-covered', under !== '');
         button.setAttribute('aria-pressed', String(locked));
-        button.setAttribute('aria-label', `${category}: ${traits[category]}${locked ? ', swapped' : ''}. Swap to the next one.`);
+        button.setAttribute('aria-label', `${category}: ${shown}${under}${locked ? ', swapped' : ''}. Swap to the next one.`);
       }
       resetButton.hidden = Object.keys(locks).length === 0;
       for (const sample of document.querySelectorAll('.sample')) {
@@ -259,6 +303,7 @@ const svg = generateAvatar('alice@example.com');</code></pre>
     }
 
     function swap(category) {
+      const { traitNames, getTraits } = api();
       const names = traitNames[category];
       const current = getTraits(input.value, locks)[category];
       locks = { ...locks, [category]: names[(names.indexOf(current) + 1) % names.length] };
@@ -294,14 +339,13 @@ const svg = generateAvatar('alice@example.com');</code></pre>
     });
 
     $('download-svg').addEventListener('click', () => {
-      const svg = generateAvatar(input.value, { size: 512, traits: locks });
-      download(new Blob([svg], { type: 'image/svg+xml' }), `hashface-${slug(input.value)}.svg`);
+      download(new Blob([avatarSvg(512)], { type: 'image/svg+xml' }), `hashface-${slug(input.value)}.svg`);
     });
 
     $('download-png').addEventListener('click', async () => {
       try {
         const canvas = Object.assign(document.createElement('canvas'), { width: 512, height: 512 });
-        await renderToCanvas(canvas, generateAvatar(input.value, { size: 512, traits: locks }));
+        await renderToCanvas(canvas, avatarSvg(512));
         const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
         if (!blob) throw new Error('the browser could not encode a PNG');
         download(blob, `hashface-${slug(input.value)}.png`);
@@ -310,7 +354,8 @@ const svg = generateAvatar('alice@example.com');</code></pre>
       }
     });
 
-    for (const seed of SAMPLES) {
+    const samples = [];
+    function addSample(seed, partyOnly = false) {
       const button = document.createElement('button');
       const image = document.createElement('img');
       const label = document.createElement('span');
@@ -318,7 +363,7 @@ const svg = generateAvatar('alice@example.com');</code></pre>
       button.className = 'sample';
       button.dataset.seed = seed;
       button.setAttribute('aria-label', `Load the avatar for ${seed}`);
-      Object.assign(image, { src: toDataUri(generateAvatar(seed, { size: 64 })), alt: '', width: 64, height: 64 });
+      Object.assign(image, { alt: '', width: 64, height: 64 });
       label.textContent = seed;
       button.append(image, label);
       button.addEventListener('click', () => {
@@ -326,10 +371,75 @@ const svg = generateAvatar('alice@example.com');</code></pre>
         preview.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'nearest' });
       });
       $('samples').append(button);
+      samples.push({ seed, button, image, partyOnly });
     }
 
-    $('logo').innerHTML = generateAvatar('hashface', { size: 60 });
-    document.querySelector('link[rel="icon"]').href = toDataUri(generateAvatar('hashface', { size: 64 }));
+    function drawSamples() {
+      for (const { seed, button, image, partyOnly } of samples) {
+        button.hidden = partyOnly && !party;
+        if (!button.hidden) image.src = toDataUri(api().generateAvatar(seed, { size: 64 }));
+      }
+    }
+
+    function drawLogo() {
+      logo.innerHTML = party
+        ? party.generateAvatar('hashface', { size: 60, traits: { costume: 'golden-mascot' } })
+        : core.generateAvatar('hashface', { size: 60 });
+    }
+
+    // The secret: three activations of the logo within a second toggle the costume party.
+    let burst = { start: 0, count: 0 };
+    let switching = false;
+
+    async function toggleParty() {
+      if (switching) return;
+      if (party) {
+        party = null;
+        const { costume, ...rest } = locks;
+        locks = rest;
+        partyNote.textContent = 'Costume party over. Everyone changed back.';
+      } else {
+        switching = true;
+        logo.classList.remove('wiggle');
+        void logo.offsetWidth;
+        logo.classList.add('wiggle');
+        try {
+          [party, guests] = await Promise.all([import('../dist/costumes/index.js'), import('./tributes.js')]);
+        } catch {
+          partyNote.textContent = 'The costume party could not start. Build the costumes first with npm run build.';
+          return;
+        } finally {
+          switching = false;
+        }
+        if (!samples.some((sample) => sample.partyOnly)) {
+          for (let i = 0, found = 0; found < PARTY_SAMPLES; i++) {
+            if (party.getTraits(`party-${i}`).costume === 'none') continue;
+            addSample(`party-${i}`, true);
+            found++;
+          }
+        }
+        partyNote.textContent = 'Costume party! About 1 in 25 faces now wear a costume. Psst: some names bring a special guest.';
+      }
+      drawLogo();
+      drawSamples();
+      render();
+    }
+
+    logo.addEventListener('animationend', () => logo.classList.remove('wiggle'));
+    logo.addEventListener('click', () => {
+      const now = performance.now();
+      if (burst.count === 0 || now - burst.start > 1000) burst = { start: now, count: 0 };
+      burst.count += 1;
+      if (burst.count === 3) {
+        burst = { start: 0, count: 0 };
+        toggleParty();
+      }
+    });
+
+    for (const seed of SAMPLES) addSample(seed);
+    drawLogo();
+    drawSamples();
+    document.querySelector('link[rel="icon"]').href = toDataUri(core.generateAvatar('hashface', { size: 64 }));
     $('boot').remove();
     render();
   </script>
