@@ -1,0 +1,34 @@
+{
+  "name": "hashface",
+  "version": "0.0.0",
+  "description": "Deterministic, dependency-free SVG avatars in a bold-blocks style. Same string in, same face out.",
+  "keywords": [
+    "avatar",
+    "identicon",
+    "svg",
+    "deterministic",
+    "generator"
+  ],
+  "homepage": "https://github.com/Waiivyy/hashface#readme",
+  "bugs": {
+    "url": "https://github.com/Waiivyy/hashface/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Waiivyy/hashface.git"
+  },
+  "license": "MIT",
+  "author": "Waiivyy",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.build.json --noEmit",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2"
+  }
+}
