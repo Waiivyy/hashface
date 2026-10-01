@@ -35,11 +35,11 @@ test('digest expands the hash into eight reference words', () => {
 });
 
 test('digest hashes UTF-8 exactly as given', () => {
-  assert.equal(digest('ü')[0], 3965709055);
+  assert.equal(digest('\u00FC')[0], 3965709055);
   // No Unicode normalization: precomposed and decomposed forms differ.
-  assert.notEqual(digest('é')[0], digest('é')[0]);
+  assert.notEqual(digest('\u00E9')[0], digest('e\u0301')[0]);
   // A lone surrogate encodes as U+FFFD, so both seeds share an avatar.
-  assert.deepEqual(digest('\uD800'), digest('�'));
+  assert.deepEqual(digest('\uD800'), digest('\uFFFD'));
 });
 
 test('a one-character change flips about half of the digest bits', () => {

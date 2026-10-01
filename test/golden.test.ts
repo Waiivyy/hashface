@@ -17,7 +17,7 @@ const SEEDS = [
   '',
   ' alice ',
   'Alice',
-  'ünïcödé',
+  '\u00FCn\u00EFc\u00F6d\u00E9',
   '\u{1F98A}',
   'a'.repeat(1000),
   '1234567890',

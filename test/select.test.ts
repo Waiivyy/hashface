@@ -45,7 +45,7 @@ test('selectTraits matches the reference implementation', () => {
   assert.deepEqual(selectTraits('alice'), { shape: 'circle', eyes: 'wink', mouth: 'smirk', accessory: 'antenna', palette: 'grape', pattern: 'dots' });
   assert.deepEqual(selectTraits('bob'), { shape: 'drop', eyes: 'wink', mouth: 'o', accessory: 'horns', palette: 'grape', pattern: 'waves' });
   assert.deepEqual(selectTraits(''), { shape: 'capsule', eyes: 'visor', mouth: 'flat', accessory: 'sprout', palette: 'coral', pattern: 'none' });
-  assert.deepEqual(selectTraits('ünïcödé'), { shape: 'arch', eyes: 'cyclops', mouth: 'flat', accessory: 'sprout', palette: 'sky', pattern: 'waves' });
+  assert.deepEqual(selectTraits('\u00FCn\u00EFc\u00F6d\u00E9'), { shape: 'arch', eyes: 'cyclops', mouth: 'flat', accessory: 'sprout', palette: 'sky', pattern: 'waves' });
   assert.deepEqual(selectTraits('\u{1F98A}'), { shape: 'capsule', eyes: 'happy', mouth: 'tongue', accessory: 'none', palette: 'lemon', pattern: 'grid' });
   assert.deepEqual(selectTraits('hashface'), { shape: 'arch', eyes: 'dots', mouth: 'grin', accessory: 'crown', palette: 'tangerine', pattern: 'dots' });
 });
