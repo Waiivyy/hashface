@@ -1,6 +1,6 @@
 # hashface design
 
-Status: draft for review, 2026-10-01
+Status: approved 2026-10-01, implemented in v0.1
 
 ## 1. What it is
 
@@ -181,8 +181,12 @@ interface AvatarOptions {
 getTraits(seed: string, locked?: Partial<Traits>): Traits  // selection only, no rendering
 traitNames                                                 // the catalog of variant names per category
 toDataUri(svg: string): string                             // data URI for <img src>
-renderToCanvas(canvas: HTMLCanvasElement, svg: string): Promise<void>  // browser-only helper
+renderToCanvas(canvas: CanvasTarget, svg: string): Promise<void>  // browser-only helper
 ```
+
+`CanvasTarget` describes a canvas structurally (width, height and a 2d context with
+`clearRect` and `drawImage`). An `HTMLCanvasElement` fits it, and the published types
+never need the DOM lib, so Node projects without DOM types compile cleanly.
 
 Errors
 
@@ -213,7 +217,12 @@ Output is a single line. Wrapped here for reading:
 - Dev dependencies: `typescript` and `@types/node` only. Tests use Node's built-in test
   runner, which runs the `.ts` test files directly. Development needs Node 22.18 or
   newer; consumers need any runtime with ES2020 and `TextEncoder`.
-- GitHub Actions runs the type check and the tests on every push.
+- `tsc` rewrites relative `.ts` imports to `.js` in the JavaScript it emits but not in
+  declaration files, which TypeScript 4.x rejects. A small post-build step applies the
+  same rewrite to `dist/**/*.d.ts`.
+- GitHub Actions runs the type check, the tests and a pack check on every push. The
+  pack check installs the packed tarball into a fresh project and verifies ESM import,
+  CommonJS require, the types without DOM lib, and the gzipped size.
 
 ```
 src/
