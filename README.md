@@ -17,6 +17,8 @@ Same string in, same face out. Every single time.
 
 <img src="examples/banner.svg" alt="A crowd of eighteen hashface avatars: circles, ghosts, octagons, drops and capsules wearing crowns, horns, headphones, bows and party hats">
 
+<br>
+
 </div>
 
 Hand hashface any string (a username, an email, the name of your cat) and it draws a small, slightly smug character for it: thick black outlines, flat bold colors and a hard shadow that means business. The same string always gets the same character. Nearby strings like `user1` and `user2` get different shapes and faces, not just a fresh coat of paint.
@@ -40,7 +42,8 @@ npm install github:Waiivyy/hashface
 ```js
 import { generateAvatar } from 'hashface';
 
-document.querySelector('#avatar').innerHTML = generateAvatar('alice@example.com', { size: 96 });
+const svg = generateAvatar('alice@example.com', { size: 96 });
+document.querySelector('#avatar').innerHTML = svg;
 ```
 
 That's the whole setup. No API key, no network, no canvas required.

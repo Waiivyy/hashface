@@ -70,17 +70,22 @@ function banner(): string {
   return svgRoot(width, height, tileClip(size), tiles.join(''));
 }
 
-/** One strip per category: every variant locked over the mascot's other traits, with its name. */
+/**
+ * One strip per category: every variant locked over the mascot's other traits,
+ * with its name. Patterns get a small round head with no accessory, so the
+ * background shows.
+ */
 function traitStrip(category: Category): string {
   const size = 72;
   const gap = 18;
   const pad = 20;
   const names: readonly string[] = VARIANTS[category];
+  const base: TraitLocks = category === 'pattern' ? { shape: 'circle', accessory: 'none' } : {};
   const width = pad * 2 + names.length * size + (names.length - 1) * gap;
   const height = pad + size + 40;
   const cells = names.map((name, i) => {
     const x = pad + i * (size + gap);
-    const avatar = generateAvatar('hashface', { size, traits: { [category]: name } as TraitLocks });
+    const avatar = generateAvatar('hashface', { size, traits: { ...base, [category]: name } as TraitLocks });
     const label =
       `<text x="${x + size / 2}" y="${pad + size + 26}" text-anchor="middle" font-family="${MONO}" ` +
       `font-size="12" font-weight="600" fill="${INK}">${escapeXml(name)}</text>`;
