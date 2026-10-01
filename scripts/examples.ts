@@ -1,15 +1,21 @@
 /**
- * Writes the README gallery: examples/<seed>.svg at 96px for a fixed set of
- * seeds. test/examples.test.ts fails when these drift from the current output.
- * Run with: node scripts/examples.ts
+ * Writes every image the README shows into examples/, replacing what was
+ * there. test/examples.test.ts fails when the committed files drift from the
+ * current output. Run with: node scripts/examples.ts
  */
 
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { generateAvatar } from '../src/index.ts';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { galleryFiles } from './gallery.ts';
 
-const SEEDS = ['alice', 'bob', 'carol', 'dave', 'eve', 'mallory', 'trent', 'peggy'];
+const out = fileURLToPath(new URL('../examples/', import.meta.url));
+const files = galleryFiles();
 
-const out = new URL('../examples/', import.meta.url);
-mkdirSync(out, { recursive: true });
-for (const seed of SEEDS) writeFileSync(new URL(`${seed}.svg`, out), generateAvatar(seed, { size: 96 }));
-console.log(`wrote ${SEEDS.length} examples to examples/`);
+rmSync(out, { recursive: true, force: true });
+for (const [path, svg] of files) {
+  const file = join(out, path);
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, svg);
+}
+console.log(`wrote ${files.size} files to examples/`);
