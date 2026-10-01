@@ -11,7 +11,7 @@ Same string in, same face out. Every single time.
 
 [![CI](https://github.com/Waiivyy/hashface/actions/workflows/ci.yml/badge.svg)](https://github.com/Waiivyy/hashface/actions/workflows/ci.yml)
 ![Zero dependencies](https://img.shields.io/badge/dependencies-0-7BDFB5?labelColor=111111)
-![About 7 KB gzipped](https://img.shields.io/badge/gzipped-7%20KB-FFD23F?labelColor=111111)
+![About 5 KB gzipped](https://img.shields.io/badge/gzipped-5%20KB-FFD23F?labelColor=111111)
 ![TypeScript types included](https://img.shields.io/badge/types-included-62B0EC?labelColor=111111)
 [![MIT license](https://img.shields.io/badge/license-MIT-FF6B9A?labelColor=111111)](LICENSE)
 
@@ -31,7 +31,7 @@ Think of it as an identicon that went to art school.
 
 - **Deterministic.** The same input produces a byte-identical SVG, and golden-snapshot tests hold the line.
 - **Actually different.** Neighboring strings change shape and face, not only color. The test suite checks this over 10,000 neighboring pairs.
-- **Tiny.** Zero dependencies, about 7 KB gzipped, about 1 KB of SVG per avatar.
+- **Tiny.** Zero dependencies, about 5 KB gzipped, about 1 KB of SVG per avatar.
 - **Safe to inline.** No ids, no scripts, no external references, and the seed never appears in the output, so an email used as a seed stays out of your markup.
 - **Runs where your code runs.** Plain ES modules for browsers, Node and bundlers, with TypeScript types included.
 

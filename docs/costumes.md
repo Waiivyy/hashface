@@ -20,7 +20,7 @@ A costume party for hashface, in three parts:
 Goals
 
 - **Core untouched.** `hashface` keeps producing byte-identical avatars and stays
-  about 7 KB gzipped. The costume code is never downloaded unless someone imports it.
+  about 5 KB gzipped. The costume code is never downloaded unless someone imports it.
 - **Rare and surprising.** Costumes are easter eggs, not a theme: 4% of seeds
   wear one.
 - **Still deterministic.** The same seed and options always give the same
