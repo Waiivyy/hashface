@@ -1,7 +1,7 @@
 /**
  * Trait selection. Each category reads its own digest word, so categories are
- * independent, and a future category (words 6 and 7 are reserved) never
- * changes existing selections. Within a category the variant is picked by
+ * independent, and a future category (word 7 is reserved; word 6 belongs to
+ * the costume add-on) never changes existing selections. Within a category the variant is picked by
  * rendezvous hashing, so adding a variant later only moves the avatars the new
  * variant wins. See docs/design.md section 6.
  */

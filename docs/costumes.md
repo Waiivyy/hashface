@@ -114,7 +114,7 @@ catalog lists the legendary names, since names and tiers are permanent selection
 from the palette after the costume's color overrides, plus ink and white.
 
 "Skin" sits on the head, under the eyes and mouth. It holds face coverings: the
-ninja's mask band, the mummy's bandages, the panda's eye patches. When the shape
+ninja's hood, the mummy's bandages, the panda's eye patches. When the shape
 is not pinned, skin must stay inside every head shape. A head-wide covering such
 as the mummy's bandages pins its shape.
 
@@ -131,8 +131,8 @@ Signature parts in parentheses; the seed picks everything else. Names freeze at
 the add-on's first release.
 
 - **Classics:** `pirate` (eyepatch, bandana), `wizard` (starry pointy hat, big
-  white beard), `knight` (steel helmet with an eye slit, plume), `ninja` (mask
-  band, eyes peeking out), `viking` (horned helmet, braided ginger beard),
+  white beard), `knight` (steel helmet with an eye slit, plume), `ninja` (dark
+  hood, eyes peeking out), `viking` (horned helmet, braided ginger beard),
   `astronaut` (glass helmet rim with a glare)
 - **Spooky:** `vampire` (fangs, widow's peak, high cape collar, pale skin),
   `zombie` (green skin, stitches, mismatched eyes), `mummy` (bandage wraps),
@@ -152,7 +152,7 @@ the add-on's first release.
 - **Developer jokes:** `rubber-duck` (yellow head, orange beak, hair tuft),
   `coffee-addict` (spiral eyes with bags, steaming mug), `merge-conflict` (two
   halves in different colors), `not-found` (eyes drawn as 4 and 4, mouth as 0),
-  `infinite-loop` (spiral eyes)
+  `infinite-loop` (infinity-sign eyes, a spinning arrow)
 - **Seasonal:** `snowman` (white round head, carrot nose, coal mouth, top hat),
   `holiday-elf` (green pointy hat with a bell, pointed ears), `birthday` (cake hat
   with a lit candle, blushing cheeks), `valentine` (heart eyes, blush)

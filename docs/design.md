@@ -155,8 +155,9 @@ circular avatars are made with CSS `border-radius`, for the same reason.
    poorly; `user1` and `user3` differ in only a handful of output bits. The finalizer
    spreads any input change across every output bit.
 4. Each category reads its own fixed word: shape 0, eyes 1, mouth 2, accessory 3,
-   palette 4, pattern 5. Words 6 and 7 are reserved, so a future category never changes
-   existing selections.
+   palette 4, pattern 5. Word 6 belongs to the costume add-on (docs/costumes.md
+   section 4) and word 7 is reserved, so a future category never changes existing
+   selections.
 5. Within a category the variant is chosen by rendezvous (highest random weight)
    hashing: every variant gets the score `mix(word XOR hash(name))`, and the highest
    score wins. When variants are added later, only the avatars that the new variant
