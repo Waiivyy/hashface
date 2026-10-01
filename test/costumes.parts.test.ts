@@ -52,3 +52,19 @@ check('food', {
   avocado: [['shape', 'palette'], true],
   cupcake: [['shape', 'accessory', 'palette'], true],
 });
+
+check('gamer', {
+  'pixel-hero': [['shape', 'eyes', 'accessory'], true],
+  slime: [['shape'], true],
+  mimic: [['shape', 'mouth', 'palette'], true],
+  'final-boss': [['accessory'], true],
+  glitch: [['eyes'], true],
+});
+
+check('developer', {
+  'rubber-duck': [['shape', 'mouth', 'accessory', 'palette'], false],
+  'coffee-addict': [['eyes', 'accessory'], true],
+  'merge-conflict': [['shape'], true],
+  'not-found': [['eyes', 'mouth'], false],
+  'infinite-loop': [['eyes'], true],
+});
