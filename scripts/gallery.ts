@@ -9,6 +9,16 @@
 
 import { CATEGORIES, VARIANTS, type Category, type TraitLocks } from '../src/catalog.ts';
 import { escapeXml } from '../src/compose.ts';
+import type { CostumeName } from '../src/costumes/catalog.ts';
+import { generateAvatar as dressUp } from '../src/costumes/index.ts';
+import { ANIMALS } from '../src/costumes/parts/animals.ts';
+import { CLASSICS } from '../src/costumes/parts/classics.ts';
+import { DEV } from '../src/costumes/parts/dev.ts';
+import { FOOD } from '../src/costumes/parts/food.ts';
+import { GAMER } from '../src/costumes/parts/gamer.ts';
+import { LEGENDARY } from '../src/costumes/parts/legendary.ts';
+import { SEASONAL } from '../src/costumes/parts/seasonal.ts';
+import { SPOOKY } from '../src/costumes/parts/spooky.ts';
 import { generateAvatar, getTraits } from '../src/index.ts';
 import { INK, PALETTES } from '../src/palettes.ts';
 import { EYES } from '../src/traits/eyes.ts';
@@ -70,28 +80,53 @@ function banner(): string {
   return svgRoot(width, height, tileClip(size), tiles.join(''));
 }
 
+const STRIP = { size: 72, gap: 18, pad: 20 } as const;
+
+/** Avatars in a row on the panel, each with its name underneath. */
+function labeledStrip(cells: readonly (readonly [avatar: string, name: string])[]): string {
+  const { size, gap, pad } = STRIP;
+  const width = pad * 2 + cells.length * size + (cells.length - 1) * gap;
+  const height = pad + size + 40;
+  const body = cells.map(([avatar, name], i) => {
+    const x = pad + i * (size + gap);
+    const label =
+      `<text x="${x + size / 2}" y="${pad + size + 26}" text-anchor="middle" font-family="${MONO}" ` +
+      `font-size="12" font-weight="600" fill="${INK}">${escapeXml(name)}</text>`;
+    return tile(avatar, x, pad, size) + label;
+  });
+  return svgRoot(width, height, tileClip(size), body.join(''));
+}
+
 /**
  * One strip per category: every variant locked over the mascot's other traits,
  * with its name. Patterns get a small round head with no accessory, so the
  * background shows.
  */
 function traitStrip(category: Category): string {
-  const size = 72;
-  const gap = 18;
-  const pad = 20;
   const names: readonly string[] = VARIANTS[category];
   const base: TraitLocks = category === 'pattern' ? { shape: 'circle', accessory: 'none' } : {};
-  const width = pad * 2 + names.length * size + (names.length - 1) * gap;
-  const height = pad + size + 40;
-  const cells = names.map((name, i) => {
-    const x = pad + i * (size + gap);
-    const avatar = generateAvatar('hashface', { size, traits: { ...base, [category]: name } as TraitLocks });
-    const label =
-      `<text x="${x + size / 2}" y="${pad + size + 26}" text-anchor="middle" font-family="${MONO}" ` +
-      `font-size="12" font-weight="600" fill="${INK}">${escapeXml(name)}</text>`;
-    return tile(avatar, x, pad, size) + label;
-  });
-  return svgRoot(width, height, tileClip(size), cells.join(''));
+  return labeledStrip(
+    names.map((name) => [generateAvatar('hashface', { size: STRIP.size, traits: { ...base, [category]: name } as TraitLocks }), name]),
+  );
+}
+
+/** The costume groups of docs/costumes.md section 6, one README strip each. */
+export const COSTUME_GROUPS: Readonly<Record<string, readonly CostumeName[]>> = Object.freeze({
+  classics: Object.keys(CLASSICS) as CostumeName[],
+  spooky: Object.keys(SPOOKY) as CostumeName[],
+  animals: Object.keys(ANIMALS) as CostumeName[],
+  food: Object.keys(FOOD) as CostumeName[],
+  gamer: Object.keys(GAMER) as CostumeName[],
+  developer: Object.keys(DEV) as CostumeName[],
+  seasonal: Object.keys(SEASONAL) as CostumeName[],
+  legendary: Object.keys(LEGENDARY) as CostumeName[],
+});
+
+/** Every costume of a group on the mascot, with the accessory off unless the costume brings one. */
+function costumeStrip(names: readonly CostumeName[]): string {
+  return labeledStrip(
+    names.map((costume) => [dressUp('hashface', { size: STRIP.size, traits: { costume, accessory: 'none' } }), costume]),
+  );
 }
 
 /** The anatomy avatar built up layer by layer; the last frame is the finished avatar. */
@@ -120,5 +155,6 @@ export function galleryFiles(): Map<string, string> {
   files.set('banner.svg', banner());
   anatomyFrames().forEach((svg, i) => files.set(`anatomy/${i + 1}-${ANATOMY_STEPS[i]}.svg`, svg));
   for (const category of CATEGORIES) files.set(`traits/${category}.svg`, traitStrip(category));
+  for (const [group, names] of Object.entries(COSTUME_GROUPS)) files.set(`costumes/${group}.svg`, costumeStrip(names));
   return files;
 }

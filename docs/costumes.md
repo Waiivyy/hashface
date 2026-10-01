@@ -1,6 +1,6 @@
 # Costume add-on design
 
-Status: draft for review, 2026-10-01. Builds on [design.md](design.md).
+Status: approved and implemented, 2026-10-01. Builds on [design.md](design.md).
 
 ## 1. What it is
 
@@ -99,7 +99,6 @@ A costume is a record in `src/costumes/`:
 
 | Field     | Replaces                         | Rules (zone contract, design.md section 5)                      |
 | --------- | -------------------------------- | --------------------------------------------------------------- |
-| `tier`    |                                  | `'regular'` or `'legendary'`                                     |
 | `shape`   | the head silhouette              | one element; contains both face zones; top edge between y 12 and 18 |
 | `skin`    | nothing; a new layer             | stays inside the head; drawn under the eyes and mouth           |
 | `eyes`    | the eyes                         | inside the eyes zone                                             |
@@ -109,7 +108,8 @@ A costume is a record in `src/costumes/`:
 | `pattern` | the background pattern           | a single path                                                    |
 | `colors`  | any of the five palette colors   | a partial palette, e.g. `{ body: '#F4F4F4' }` for the panda     |
 
-Anything a costume leaves out comes from the seed. A costume that replaces
+Anything a costume leaves out comes from the seed. The tier is not a field: the
+catalog lists the legendary names, since names and tiers are permanent selection data. A costume that replaces
 `back` or `front` replaces the whole accessory. Colors in costume fragments come
 from the palette after the costume's color overrides, plus ink and white.
 
@@ -219,7 +219,7 @@ signature parts and passes the zone tests.
 
 - `package.json` exports `./costumes` (types and default) next to `.`.
 - Layout: `src/costumes/index.ts` (entry point), `select.ts` (roll, tier, pick,
-  locks), `catalog.ts` (the 40 names with tier and group), `types.ts` (the costume
+  locks), `catalog.ts` (the 40 names and the legendary tier), `types.ts` (the costume
   record) and one drawing file per group.
 - Budgets in the pack check: the core stays within its 10 KB gzipped budget, and
   the add-on, measured with the core modules it imports, stays within 16 KB.

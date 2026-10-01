@@ -166,6 +166,62 @@ Every avatar is one pick from each of six categories: 196,608 combinations, 4,09
 
 <img src="examples/traits/palette.svg" alt="Palettes: lemon, sky, mint, coral, grape, bubblegum, tangerine, cream">
 
+## Costume party
+
+Every so often, a face shows up in costume. `hashface/costumes` is an opt-in entry point that works exactly like the core, except that about 1 in 25 avatars wear one of 40 costumes: pirates, vampires, pizza slices, rubber ducks and more.
+
+```js
+import { generateAvatar, getTraits, costumeParts } from 'hashface/costumes';
+
+generateAvatar('alice');                                     // about 1 in 25 seeds arrive in costume
+generateAvatar('alice', { traits: { costume: 'pirate' } });  // always a pirate
+generateAvatar('alice', { traits: { costume: 'none' } });    // never a costume
+getTraits('alice').costume;                                  // 'none' or a costume name
+costumeParts.pirate;                                         // ['eyes', 'accessory']
+```
+
+- **Rare on purpose.** 4% of seeds wear a costume, and 1 wearer in 50 gets a legendary one: about 1 avatar in 1,250.
+- **Nobody else changes.** A seed without a costume renders byte for byte like it does in `hashface`, so switching the import never changes a normal face. The costume code only downloads when you import `hashface/costumes`.
+- **Every pirate is a different pirate.** A costume pins its signature parts, such as the eyepatch and the bandana, and the seed picks the rest.
+- **Locks still work.** Lock a costume by name, or lock `'none'` to keep a seed out of the party. Other locks apply too, but signature parts win: lock googly eyes on a pirate and the eyepatch stays, while `getTraits` still reports `eyes: 'googly'`. `costumeParts` lists the categories each costume replaces, handy for showing which controls a costume covers.
+- **Stable.** Whether a seed wears a costume never changes. New costumes arrive in minor releases and only claim the wearers they win: adding a 38th regular costume moves about 1 in 38 of them. Redrawing an existing costume is a major release.
+
+The whole wardrobe, modeled by the mascot:
+
+**Classics**
+
+<img src="examples/costumes/classics.svg" alt="Classics: pirate, wizard, knight, ninja, viking, astronaut">
+
+**Spooky**
+
+<img src="examples/costumes/spooky.svg" alt="Spooky: vampire, zombie, mummy, witch, skeleton, alien">
+
+**Animals**
+
+<img src="examples/costumes/animals.svg" alt="Animals: cat, frog, panda, fox, penguin, bunny">
+
+**Food**
+
+<img src="examples/costumes/food.svg" alt="Food: pizza, donut, taco, avocado, cupcake">
+
+**Gamer tropes**
+
+<img src="examples/costumes/gamer.svg" alt="Gamer tropes: pixel-hero, slime, mimic, final-boss, glitch">
+
+**Developer jokes**
+
+<img src="examples/costumes/developer.svg" alt="Developer jokes: rubber-duck, coffee-addict, merge-conflict, not-found, infinite-loop">
+
+**Seasonal**
+
+<img src="examples/costumes/seasonal.svg" alt="Seasonal: snowman, holiday-elf, birthday, valentine">
+
+**Legendary**
+
+<img src="examples/costumes/legendary.svg" alt="Legendary: golden-mascot, cosmic, rainbow">
+
+Rumor has it the demo's logo is hiding something.
+
 ## Anatomy of a face
 
 Every avatar is stacked from the same layers in the same order. Here is `mallory`, assembled one layer at a time:
