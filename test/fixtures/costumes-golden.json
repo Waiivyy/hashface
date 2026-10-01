@@ -1,0 +1,242 @@
+[
+  {
+    "seed": "golden",
+    "costume": "pirate",
+    "sha256": "3d6f3f2cd6c6bcf22f2c4095cac9f4c8b2278b0353d4341db9bcc504529501a2"
+  },
+  {
+    "seed": "golden",
+    "costume": "wizard",
+    "sha256": "64bfbad9efba8ac188a40d708769b3af383beee36c7223e119b1b264b338564c"
+  },
+  {
+    "seed": "golden",
+    "costume": "knight",
+    "sha256": "ca5b8e98b412562b7f9c50ed15608cd01fcfd8b4a056813372aa73f6d265413d"
+  },
+  {
+    "seed": "golden",
+    "costume": "ninja",
+    "sha256": "af927baed0ac1b2fc45dd1281dafce1ba16aecbde6e84584b8cde84a3dd6b65e"
+  },
+  {
+    "seed": "golden",
+    "costume": "viking",
+    "sha256": "4507030c83f9353707ac5aad69429177c0010ee5ae748570235254bf123b1038"
+  },
+  {
+    "seed": "golden",
+    "costume": "astronaut",
+    "sha256": "c73c3bdb1cbee638fca803e5ed417e67f56737188e38e54602970d89220a94d9"
+  },
+  {
+    "seed": "golden",
+    "costume": "vampire",
+    "sha256": "04ccaa681d73d2a8da1405ce13e59deebf84383fb1cb77e3489670b19982eafd"
+  },
+  {
+    "seed": "golden",
+    "costume": "zombie",
+    "sha256": "120082dd310c8b7aa9a27374d530981872e9a71b95616ef93bb8e7668bee61b2"
+  },
+  {
+    "seed": "golden",
+    "costume": "mummy",
+    "sha256": "660c5a4c446f52645ac983a6848d2a3f85131bcc3acbd01f552bfb5670002724"
+  },
+  {
+    "seed": "golden",
+    "costume": "witch",
+    "sha256": "dc6b75b3056fe39e4d936ae54542cdff8466a5d939b07c5f67ddbae413ac3a5d"
+  },
+  {
+    "seed": "golden",
+    "costume": "skeleton",
+    "sha256": "61f4682fa80fb8c648fd6561f60d589ad89143d1f9a47b0c3be266270c528c4b"
+  },
+  {
+    "seed": "golden",
+    "costume": "alien",
+    "sha256": "77b46164db00a3157e36e5fcdac436f97cc45694b6100c432f79c2d4cdb55c5f"
+  },
+  {
+    "seed": "golden",
+    "costume": "cat",
+    "sha256": "cb80f77a0ff734ccb22ea5d40bcba49b7650c6b5951e97432e3d203dc5bf4733"
+  },
+  {
+    "seed": "golden",
+    "costume": "frog",
+    "sha256": "a08da14d80dd00d9877e9daee0ffb05faf9f7d4c3c519f8532a8181a84fd5453"
+  },
+  {
+    "seed": "golden",
+    "costume": "panda",
+    "sha256": "70b1e171ce6520df095400cdcdd1c88f7ea3f63c7297c1bb7494b530445de43d"
+  },
+  {
+    "seed": "golden",
+    "costume": "fox",
+    "sha256": "624e35c918c058d4c3ae45f377be529bde3e1601ee0d9988fff554d1f34b5d18"
+  },
+  {
+    "seed": "golden",
+    "costume": "penguin",
+    "sha256": "bb8679f1ed13ae34ea6baa71e073dcdbc7728c15c53d26f2f805e92f7c75e928"
+  },
+  {
+    "seed": "golden",
+    "costume": "bunny",
+    "sha256": "efba1bd3d8c82d648f6617c4633791e2cd59e57d7581239667d8fb9b0283a227"
+  },
+  {
+    "seed": "golden",
+    "costume": "pizza",
+    "sha256": "08eea56eb0624f1b3805f5295db6f11d3481aa6bc936825ec75429d203dc409c"
+  },
+  {
+    "seed": "golden",
+    "costume": "donut",
+    "sha256": "217141fc28a060ee760e3c193e1ab728fdd15b2b1ffd00ead9363f021e50fd9e"
+  },
+  {
+    "seed": "golden",
+    "costume": "taco",
+    "sha256": "a54a3f47bb34ff5aa071448018e0b709d879286bc963ee623eaef37a490debe4"
+  },
+  {
+    "seed": "golden",
+    "costume": "avocado",
+    "sha256": "2d564da3a626bd09474888aa0b0cbeba8acb3f23fd4efc7778e08cb7f9ab048d"
+  },
+  {
+    "seed": "golden",
+    "costume": "cupcake",
+    "sha256": "b39f226d517037fb00db0db5d237f22383196d4bfaaa66629afb349c44dc57ef"
+  },
+  {
+    "seed": "golden",
+    "costume": "pixel-hero",
+    "sha256": "81944e51e403b483e8053a64b9415391b1e214f9385ff9288d96cea02945dae9"
+  },
+  {
+    "seed": "golden",
+    "costume": "slime",
+    "sha256": "5e58f71d415a494c761f8dc3cdfa3d593d4206b9ea5882ee872a75e9b523fd36"
+  },
+  {
+    "seed": "golden",
+    "costume": "mimic",
+    "sha256": "23e74828476b7a51ee41c28df8f1ed8f1fe8a3ee6a5b1ddd29fc14de173ddd80"
+  },
+  {
+    "seed": "golden",
+    "costume": "final-boss",
+    "sha256": "f5ddd7b81c391629829dd0d20923e58d2fdf896a411941e80c80a093990d3848"
+  },
+  {
+    "seed": "golden",
+    "costume": "glitch",
+    "sha256": "05e88017b53ac74b269e6b9405f9ffa6d8413967adbb7e28322fa9214363ec44"
+  },
+  {
+    "seed": "golden",
+    "costume": "rubber-duck",
+    "sha256": "2412a4fac1bddb48ca785d9fe79c353b9213157039fdc8e70117bd978e01a88b"
+  },
+  {
+    "seed": "golden",
+    "costume": "coffee-addict",
+    "sha256": "0c7f3af2581dcc27f14c255cc894ba318d6b750729c45ef31cf69afa594d08e6"
+  },
+  {
+    "seed": "golden",
+    "costume": "merge-conflict",
+    "sha256": "66dbc0f80f737f395a02fef3206a00c47def88fd80f8a386c1b9fad0285d320a"
+  },
+  {
+    "seed": "golden",
+    "costume": "not-found",
+    "sha256": "0d1c5473b80b4184ad34dc7b20c40e745574f8fc00fc104844bc20738ec968d5"
+  },
+  {
+    "seed": "golden",
+    "costume": "infinite-loop",
+    "sha256": "abc60c2bbe3f6c7c637aa6ed1824930a2a5bbfbef11a0772be6589b5758f99d5"
+  },
+  {
+    "seed": "golden",
+    "costume": "snowman",
+    "sha256": "1bbd5f23226a2539d7ecb73c31a730768567361831ca7900973c11d2224f68ce"
+  },
+  {
+    "seed": "golden",
+    "costume": "holiday-elf",
+    "sha256": "11bcd98d86d4b5044ffbabdbef0adcefdcffdcc115f18e270c18da76904eb920"
+  },
+  {
+    "seed": "golden",
+    "costume": "birthday",
+    "sha256": "51b96022f97be79b1b4a6b1db6f5ba0d4e12f9f897a07cff10bfb8932327c134"
+  },
+  {
+    "seed": "golden",
+    "costume": "valentine",
+    "sha256": "d1ae9b9d2b7df61af07527cfb499e2ae022703b4a597d5d85383c7b2dc24f773"
+  },
+  {
+    "seed": "golden",
+    "costume": "golden-mascot",
+    "sha256": "0b95349534e0c0482bbfb69fafc16d0352ea901ce80da3e4a786cf86fcc56405"
+  },
+  {
+    "seed": "golden",
+    "costume": "cosmic",
+    "sha256": "8e39c6f1344984392f712e5472a82a5f4a8bbe6731b0a821f1f1be525e0b3f9f"
+  },
+  {
+    "seed": "golden",
+    "costume": "rainbow",
+    "sha256": "8de64a91d1532f475b0eee467000405cfae0c1ac6b3891bf12241325f21ea920"
+  },
+  {
+    "seed": "party-10",
+    "costume": "valentine",
+    "sha256": "95205a13d910d9c6696e8636289f02a6a0bc3ccffd222cc73c917f3d6bb3ae90"
+  },
+  {
+    "seed": "party-39",
+    "costume": "taco",
+    "sha256": "eb3eb1a27d50c912bec152575b12a011e2dd0ac8c93b7a161ab6265bcc287eb9"
+  },
+  {
+    "seed": "party-60",
+    "costume": "skeleton",
+    "sha256": "8db9fb038752bfebec972899bdacf75b25b86ee8ed768c90075abd4cc96cb466"
+  },
+  {
+    "seed": "party-94",
+    "costume": "glitch",
+    "sha256": "70446f0c1221fb416a808b7950dd9fc3402f08824ebdc6e8c6e3a598fb859a9d"
+  },
+  {
+    "seed": "party-98",
+    "costume": "fox",
+    "sha256": "3bb9547ddf372104a3b04fb891e1060f7f59abfbb0b30bf4aaa2d32fee93f657"
+  },
+  {
+    "seed": "party-145",
+    "costume": "vampire",
+    "sha256": "05df9138710a2b249092fb4f6868beba4f22e0f80b2d24d51194aeb48a802e4e"
+  },
+  {
+    "seed": "party-146",
+    "costume": "witch",
+    "sha256": "2bbf24843dcfd17afb7f724193cf964158a50f72fae2ee0f0c22d0507eb52564"
+  },
+  {
+    "seed": "party-226",
+    "costume": "fox",
+    "sha256": "98b72aa4d85860153e833a42ae4bdda92732b9c931376ba44cf6fa5a803d330f"
+  }
+]
