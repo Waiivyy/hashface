@@ -168,25 +168,26 @@ Every avatar is one pick from each of six categories: 196,608 combinations, 4,09
 
 ## Costume party
 
-Every so often, a face shows up in costume. `hashface/costumes` is an opt-in entry point that works exactly like the core, except that about 1 in 25 avatars wear one of 40 costumes: pirates, vampires, pizza slices, rubber ducks and more.
+Forty faces are hiding in plain sight. `hashface/costumes` is an opt-in entry point that works exactly like the core, plus 40 costumes: pirates, vampires, pizza slices, rubber ducks and more. Nothing is left to chance: a seed that spells a costume's name wears that costume, and you can dress up any other seed on purpose.
 
 ```js
 import { generateAvatar, getTraits, costumeParts } from 'hashface/costumes';
 
-generateAvatar('alice');                                     // about 1 in 25 seeds arrive in costume
-generateAvatar('alice', { traits: { costume: 'pirate' } });  // always a pirate
-generateAvatar('alice', { traits: { costume: 'none' } });    // never a costume
-getTraits('alice').costume;                                  // 'none' or a costume name
+generateAvatar('ninja');                                     // the ninja, every single time
+generateAvatar('alice');                                     // alice, exactly as in hashface
+generateAvatar('alice', { traits: { costume: 'pirate' } });  // alice dressed as a pirate
+generateAvatar('ninja', { traits: { costume: 'none' } });    // the plain face for "ninja"
+getTraits('Rubber Duck').costume;                            // 'rubber-duck'
 costumeParts.pirate;                                         // ['eyes', 'accessory']
 ```
 
-- **Rare on purpose.** 4% of seeds wear a costume, and 1 wearer in 50 gets a legendary one: about 1 avatar in 1,250.
-- **Nobody else changes.** A seed without a costume renders byte for byte like it does in `hashface`, so switching the import never changes a normal face. The costume code only downloads when you import `hashface/costumes`.
-- **Every pirate is a different pirate.** A costume pins its signature parts, such as the eyepatch and the bandana, and the seed picks the rest.
-- **Locks still work.** Lock a costume by name, or lock `'none'` to keep a seed out of the party. Other locks apply too, but signature parts win: lock googly eyes on a pirate and the eyepatch stays, while `getTraits` still reports `eyes: 'googly'`. `costumeParts` lists the categories each costume replaces, handy for showing which controls a costume covers.
-- **Stable.** Whether a seed wears a costume never changes. New costumes arrive in minor releases and only claim the wearers they win: adding a 38th regular costume moves about 1 in 38 of them. Redrawing an existing costume is a major release.
+- **Names summon costumes.** A seed that spells one of the 40 names wears that costume, modeled by the mascot, and it is the same picture every time. Case and surrounding spaces don't matter, and spaces or underscores count as hyphens, so `Rubber Duck` is `rubber-duck`.
+- **Everyone else stays put.** Any other seed renders byte for byte like it does in `hashface`, so switching the import never changes a normal face. The costume code only downloads when you import `hashface/costumes`.
+- **Dress up anyone.** Lock a costume to put it on any seed. The costume pins its signature parts, such as the eyepatch and the bandana, and the seed picks the rest, so every pirate is a different pirate. Lock `'none'` to keep a seed out of costume, even one that spells a name.
+- **Locks still work.** Other locks apply too, but signature parts win: lock googly eyes on a pirate and the eyepatch stays, while `getTraits` still reports `eyes: 'googly'`. `costumeParts` lists the categories each costume replaces, handy for showing which controls a costume covers.
+- **Stable.** The names never change. A new costume arrives in a minor release and only changes the face of its own name. Redrawing an existing costume is a major release.
 
-The whole wardrobe, modeled by the mascot:
+The whole wardrobe, exactly as each name summons it:
 
 **Classics**
 
