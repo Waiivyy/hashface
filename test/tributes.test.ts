@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { traitNames } from '../src/costumes/index.ts';
 import { INK, WHITE } from '../src/palettes.ts';
@@ -25,14 +26,13 @@ interface Guest {
 
 interface Tributes {
   TRIBUTE_NAMES: readonly string[];
-  TRIBUTE_CREDITS: Readonly<Record<string, string>>;
   TRIBUTES: Readonly<Record<string, Guest>>;
   matchTribute(input: string): string | null;
   tributeSvg(name: string, size: number, title?: string): string;
 }
 
 const tributes = (await import(new URL('../demo/tributes.js', import.meta.url).href)) as Tributes;
-const { TRIBUTE_NAMES, TRIBUTE_CREDITS, TRIBUTES, matchTribute, tributeSvg } = tributes;
+const { TRIBUTE_NAMES, TRIBUTES, matchTribute, tributeSvg } = tributes;
 
 test('the guests answer to their exact names, ignoring case and surrounding spaces', () => {
   assert.deepEqual(TRIBUTE_NAMES, ['jacksepticeye', 'vanoss', 'markiplier', 'minecraft']);
@@ -84,8 +84,16 @@ test('every guest follows the fragment rules of the costumes', () => {
   }
 });
 
-test('every guest carries a credit line for the page', () => {
-  assert.deepEqual(Object.keys(TRIBUTE_CREDITS ?? {}), [...TRIBUTE_NAMES]);
-  for (const name of TRIBUTE_NAMES) assert.ok((TRIBUTE_CREDITS[name] ?? '').length > 10, name);
-  assert.match(TRIBUTE_CREDITS.minecraft ?? '', /Mojang Studios and Microsoft/);
+test('the credits page names every guest and its owners', () => {
+  const credits = readFileSync(new URL('../demo/CREDITS.md', import.meta.url), 'utf8');
+  for (const name of TRIBUTE_NAMES) assert.ok(credits.includes(`**${name}**`), `${name} is credited`);
+  for (const owner of ['Jacksepticeye', 'VanossGaming', 'Markiplier', 'Mojang Studios and Microsoft']) assert.ok(credits.includes(owner), owner);
+});
+
+test('the demo page always credits the owners and links the credits', () => {
+  const page = readFileSync(new URL('../demo/index.html', import.meta.url), 'utf8');
+  const footer = page.slice(page.indexOf('<footer>'), page.indexOf('</footer>'));
+  assert.match(footer, /All rights to characters and assets go to their owners\./);
+  assert.match(footer, /href="https:\/\/github\.com\/Waiivyy\/hashface\/blob\/main\/demo\/CREDITS\.md">Credits<\/a>/);
+  assert.ok(!page.includes('guest-credit'), 'no per-guest credit line');
 });

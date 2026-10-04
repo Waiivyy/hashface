@@ -96,13 +96,6 @@ export const TRIBUTES = Object.freeze({
 
 export const TRIBUTE_NAMES = Object.freeze(Object.keys(TRIBUTES));
 
-/** One line of credit per guest, shown on the page whenever the guest is. */
-export const TRIBUTE_CREDITS = Object.freeze({
-  jacksepticeye: "A fan tribute to Jacksepticeye's green eyeball character.",
-  vanoss: "A fan tribute to VanossGaming's owl.",
-  markiplier: 'A fan tribute to Markiplier.',
-  minecraft: 'A Creeper, from Minecraft by Mojang Studios and Microsoft.',
-});
 
 /** The guest a typed name summons, ignoring case and surrounding spaces, or null. */
 export function matchTribute(input) {
