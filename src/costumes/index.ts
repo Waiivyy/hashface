@@ -1,7 +1,7 @@
 /**
- * hashface/costumes: the core library plus a rare costume party. About 1 in 25
- * avatars wear one of 40 costumes; every other avatar is byte-identical to the
- * core's. See docs/costumes.md.
+ * hashface/costumes: the core library plus 40 costumes. A seed that spells a
+ * costume's name (say "ninja") wears that costume; a lock dresses up any seed;
+ * every other avatar is byte-identical to the core's. See docs/costumes.md.
  */
 
 import { VARIANTS } from '../catalog.ts';
@@ -26,7 +26,7 @@ export interface CostumeAvatarOptions {
   readonly title?: string | undefined;
 }
 
-/** Like the core generateAvatar, except that about 1 in 25 seeds wear a costume. */
+/** Like the core generateAvatar, except that costume names and costume locks dress the avatar up. */
 export function generateAvatar(seed: string, options: CostumeAvatarOptions = {}): string {
   const { size, title, traits } = normalizeOptions(options);
   const selected = selectCostumeTraits(seed, traits as CostumeLocks | undefined);

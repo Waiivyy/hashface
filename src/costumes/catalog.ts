@@ -15,10 +15,3 @@ export const COSTUME_NAMES = Object.freeze([
 ] as const);
 
 export type CostumeName = (typeof COSTUME_NAMES)[number];
-
-/** Rarer than the rest: 1 in 50 costume wearers gets one of these. */
-export const LEGENDARY_COSTUMES: readonly CostumeName[] = Object.freeze(['golden-mascot', 'cosmic', 'rainbow']);
-
-export const REGULAR_COSTUMES: readonly CostumeName[] = Object.freeze(
-  COSTUME_NAMES.filter((name) => !LEGENDARY_COSTUMES.includes(name)),
-);

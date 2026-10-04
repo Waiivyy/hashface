@@ -86,14 +86,15 @@ try {
       [
         '--input-type=module',
         '-e',
-        "import { generateAvatar } from 'hashface/costumes'; process.stdout.write(generateAvatar('alice') + '\\n' + generateAvatar('alice', { traits: { costume: 'pirate' } }));",
+        "import { generateAvatar } from 'hashface/costumes'; import * as core from 'hashface'; process.stdout.write([generateAvatar('alice'), generateAvatar('alice', { traits: { costume: 'pirate' } }), String(generateAvatar('ninja') !== core.generateAvatar('ninja'))].join('\\n'));",
       ],
       consumer,
     );
-    const [plain = '', dressed = ''] = out.split('\n');
+    const [plain = '', dressed = '', summoned = ''] = out.split('\n');
     pirate = dressed;
     check(plain === esm, 'hashface/costumes renders a seed without a costume exactly like hashface');
     check(pirate.startsWith('<svg') && pirate !== esm, 'hashface/costumes renders a locked costume');
+    check(summoned === 'true', 'hashface/costumes dresses up a seed that spells a costume name');
   });
   attempt('costumes CommonJS require', () => {
     const cjs = run(

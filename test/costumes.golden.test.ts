@@ -5,13 +5,12 @@ import { test } from 'node:test';
 import { COSTUME_NAMES } from '../src/costumes/catalog.ts';
 import { generateAvatar, getTraits } from '../src/costumes/index.ts';
 
-// Golden snapshots for the add-on: every costume locked on one seed, plus the
-// first seeds that roll a costume on their own. Changing an existing costume's
-// drawing ships as a major release (docs/costumes.md section 9). To change one
-// on purpose: `UPDATE_GOLDEN=1 node --test test/costumes.golden.test.ts`.
+// Golden snapshots for the add-on: every costume locked on one seed, and every
+// costume summoned by its name. Changing an existing costume's drawing ships as
+// a major release (docs/costumes.md section 9). To change one on purpose:
+// `UPDATE_GOLDEN=1 node --test test/costumes.golden.test.ts`.
 
 const FIXTURE = new URL('./fixtures/costumes-golden.json', import.meta.url);
-const NATURAL_WEARERS = 8;
 
 interface Golden {
   seed: string;
@@ -21,21 +20,13 @@ interface Golden {
 
 const sha256 = (text: string): string => createHash('sha256').update(text).digest('hex');
 
-const naturalWearers = (): string[] => {
-  const seeds: string[] = [];
-  for (let i = 0; seeds.length < NATURAL_WEARERS; i++) {
-    if (getTraits(`party-${i}`).costume !== 'none') seeds.push(`party-${i}`);
-  }
-  return seeds;
-};
-
 const snapshots = (): Golden[] => [
   ...COSTUME_NAMES.map((costume) => ({
     seed: 'golden',
     costume,
     sha256: sha256(generateAvatar('golden', { traits: { costume } })),
   })),
-  ...naturalWearers().map((seed) => ({ seed, costume: getTraits(seed).costume, sha256: sha256(generateAvatar(seed)) })),
+  ...COSTUME_NAMES.map((seed) => ({ seed, costume: getTraits(seed).costume, sha256: sha256(generateAvatar(seed)) })),
 ];
 
 test('golden snapshots pin every costume', () => {

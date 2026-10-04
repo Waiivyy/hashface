@@ -122,11 +122,9 @@ export const COSTUME_GROUPS: Readonly<Record<string, readonly CostumeName[]>> = 
   legendary: Object.keys(LEGENDARY) as CostumeName[],
 });
 
-/** Every costume of a group on the mascot, with the accessory off unless the costume brings one. */
+/** Every costume of a group, summoned by its name: the mascot wears it. */
 function costumeStrip(names: readonly CostumeName[]): string {
-  return labeledStrip(
-    names.map((costume) => [dressUp('hashface', { size: STRIP.size, traits: { costume, accessory: 'none' } }), costume]),
-  );
+  return labeledStrip(names.map((costume) => [dressUp(costume, { size: STRIP.size }), costume]));
 }
 
 /** The anatomy avatar built up layer by layer; the last frame is the finished avatar. */

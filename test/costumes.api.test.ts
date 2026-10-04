@@ -5,20 +5,27 @@ import { composeSvg } from '../src/compose.ts';
 import { COSTUME_NAMES } from '../src/costumes/catalog.ts';
 import { COSTUMES, costumeOverrides } from '../src/costumes/costumes.ts';
 import * as costumes from '../src/costumes/index.ts';
-import { selectCostumeTraits } from '../src/costumes/select.ts';
+import { MASCOT_SEED, selectCostumeTraits } from '../src/costumes/select.ts';
 import * as core from '../src/index.ts';
 
 const PARTS = ['shape', 'eyes', 'mouth', 'accessory', 'pattern', 'palette'];
 
 test('normal seeds match the core byte for byte', () => {
-  let checked = 0;
-  for (let i = 0; checked < 500; i++) {
+  for (let i = 0; i < 500; i++) {
     const seed = `plain-${i}`;
-    if (costumes.getTraits(seed).costume !== 'none') continue;
-    checked++;
     assert.equal(costumes.generateAvatar(seed), core.generateAvatar(seed));
     assert.equal(costumes.generateAvatar(seed, { size: 128, title: 'Hi' }), core.generateAvatar(seed, { size: 128, title: 'Hi' }));
   }
+});
+
+test('a costume name renders the mascot in that costume, as in the README gallery', () => {
+  for (const costume of COSTUME_NAMES) {
+    const svg = costumes.generateAvatar(costume);
+    assert.equal(svg, costumes.generateAvatar(MASCOT_SEED, { traits: { costume, accessory: 'none' } }), costume);
+    assert.equal(svg, composeSvg(selectCostumeTraits(costume), { size: 64 }, costumeOverrides(COSTUMES[costume])), costume);
+    assert.notEqual(svg, core.generateAvatar(costume), `${costume} wears its costume`);
+  }
+  assert.equal(costumes.generateAvatar('  Rubber Duck '), costumes.generateAvatar('rubber-duck'));
 });
 
 test('a costume renders through its overrides', () => {
@@ -74,8 +81,9 @@ test('traitNames and costumeParts are frozen and complete', () => {
 });
 
 test('getTraits includes the costume', () => {
-  assert.deepEqual(Object.keys(costumes.getTraits('party-10')), ['shape', 'eyes', 'mouth', 'accessory', 'palette', 'pattern', 'costume']);
-  assert.equal(costumes.getTraits('party-10').costume, 'valentine');
+  assert.deepEqual(Object.keys(costumes.getTraits('zombie')), ['shape', 'eyes', 'mouth', 'accessory', 'palette', 'pattern', 'costume']);
+  assert.equal(costumes.getTraits('zombie').costume, 'zombie');
+  assert.equal(costumes.getTraits('alice').costume, 'none');
   assert.equal(costumes.getTraits('alice', { costume: 'mummy' }).costume, 'mummy');
 });
 

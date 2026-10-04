@@ -1,46 +1,42 @@
 /**
- * Costume selection, from digest word 6 (reserved by docs/design.md section 6,
- * so the core's traits never move). See docs/costumes.md section 4.
+ * Costume selection. Nothing is left to chance: a seed that spells a costume's
+ * name wears that costume, on the mascot; every other seed wears nothing unless
+ * a lock says otherwise. See docs/costumes.md section 4.
  */
 
 import { CATEGORIES, VARIANTS, type TraitLocks, type Traits } from '../catalog.ts';
 import { describeValue } from '../describe.ts';
-import { digest, mix32 } from '../hash.ts';
-import { pickVariant, selectTraits } from '../select.ts';
-import { COSTUME_NAMES, LEGENDARY_COSTUMES, REGULAR_COSTUMES, type CostumeName } from './catalog.ts';
+import { selectTraits } from '../select.ts';
+import { COSTUME_NAMES, type CostumeName } from './catalog.ts';
 
-/** 2^32 / 25, rounded: exactly 4.00% of words wear a costume. */
-export const COSTUME_ROLL_THRESHOLD = 171798692;
-/** 2^32 / 50, rounded: 1 in 50 wearers gets a legendary costume. */
-export const LEGENDARY_THRESHOLD = 85899346;
-
-// The first two SHA-256 initial hash values: arbitrary, fixed constants.
-const TIER_SALT = 0x6a09e667;
-const PICK_SALT = 0xbb67ae85;
+/** The README mascot. It wears every costume summoned by name, with its crown off. */
+export const MASCOT_SEED = 'hashface';
 
 const COSTUME_VALUES: readonly string[] = Object.freeze(['none', ...COSTUME_NAMES]);
+const NAMES: ReadonlySet<string> = new Set(COSTUME_NAMES);
 
 export type CostumeTraits = Traits & { readonly costume: CostumeName | 'none' };
 export type CostumeLocks = TraitLocks & { readonly costume?: CostumeName | 'none' | undefined };
 
-/** The costume a digest word rolls, or 'none' for the 96% that wear nothing. */
-export function rollCostume(word: number): CostumeName | 'none' {
-  if (word >>> 0 >= COSTUME_ROLL_THRESHOLD) return 'none';
-  const legendary = mix32((word ^ TIER_SALT) >>> 0) < LEGENDARY_THRESHOLD;
-  return pickVariant(mix32((word ^ PICK_SALT) >>> 0), legendary ? LEGENDARY_COSTUMES : REGULAR_COSTUMES);
+/**
+ * The costume a seed spells, or null. Case and surrounding spaces don't matter,
+ * and spaces or underscores count as hyphens, so "Rubber Duck" is rubber-duck.
+ */
+export function matchCostume(seed: string): CostumeName | null {
+  const name = seed.trim().toLowerCase().replace(/[\s_-]+/g, '-');
+  return NAMES.has(name) ? (name as CostumeName) : null;
 }
 
 /** The six core traits plus a costume, honoring locks exactly like the core does. */
 export function selectCostumeTraits(seed: string, locks?: CostumeLocks): CostumeTraits {
   if (typeof seed !== 'string') throw new TypeError(`seed must be a string, got ${describeValue(seed)}`);
   let costumeLock: CostumeName | 'none' | undefined;
-  let coreLocks: TraitLocks | undefined;
+  // Own keys only, each read once, into a prototype-free copy for the core.
+  const coreLocks = Object.create(null) as Record<string, unknown>;
   if (locks !== undefined) {
     if (typeof locks !== 'object' || locks === null) {
       throw new TypeError(`traits must be an object, got ${describeValue(locks)}`);
     }
-    // Own keys only, each read once, into a prototype-free copy for the core.
-    const rest = Object.create(null) as Record<string, unknown>;
     for (const key of Object.keys(locks)) {
       const value: unknown = (locks as Record<string, unknown>)[key];
       if (key === 'costume') {
@@ -53,11 +49,14 @@ export function selectCostumeTraits(seed: string, locks?: CostumeLocks): Costume
       } else if (!Object.prototype.hasOwnProperty.call(VARIANTS, key)) {
         throw new RangeError(`Unknown trait category "${key}". Valid categories: ${[...CATEGORIES, 'costume'].join(', ')}`);
       } else {
-        rest[key] = value;
+        coreLocks[key] = value;
       }
     }
-    coreLocks = rest as TraitLocks;
   }
-  const traits = selectTraits(seed, coreLocks);
-  return { ...traits, costume: costumeLock ?? rollCostume(digest(seed)[6] ?? 0) };
+  const summoned = costumeLock === undefined ? matchCostume(seed) : null;
+  if (summoned !== null) {
+    coreLocks.accessory ??= 'none';
+    return { ...selectTraits(MASCOT_SEED, coreLocks as TraitLocks), costume: summoned };
+  }
+  return { ...selectTraits(seed, coreLocks as TraitLocks), costume: costumeLock ?? 'none' };
 }
