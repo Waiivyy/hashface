@@ -13,10 +13,11 @@ import { PATTERNS } from '../dist/traits/patterns.js';
 const ink = (width) => `stroke="${INK}" stroke-width="${width}"`;
 const nothing = () => '';
 
-// A Creeper face is an 8 by 8 grid of 5-unit pixels over the head at (12, 14).
-const pixels = (cells, color) => {
+// The Creeper is drawn in 5-unit pixels: its head is an 8 by 8 grid at (12, 8),
+// and its neck continues the same grid below it.
+const pixels = (cells, color, top = 8) => {
   const squares = cells.map(([row, col]) => {
-    const [x, y] = [12 + 5 * col, 14 + 5 * row];
+    const [x, y] = [12 + 5 * col, top + 5 * row];
     return `M${x} ${y}H${x + 5}V${y + 5}H${x}Z`;
   });
   return `<path d="${squares.join('')}" fill="${color}"/>`;
@@ -39,28 +40,35 @@ export const TRIBUTES = Object.freeze({
     pattern: PATTERNS.dots,
     colors: { bg: '#DFF5D8', pattern: '#C4EBB8', body: '#55C955', accent: '#1F9E5A', detail: '#E5484D' },
   },
-  // VanossGaming's owl: ear tufts, big round eyes and a beak.
+  // VanossGaming's owl: dark ear tufts, pale rings around big yellow eyes under
+  // angry brows, a dark beak, and the black shirt with yellow straps.
   vanoss: {
     shape: (fill) =>
-      `<path d="M13 43C13 52 21.5 57 32 57C42.5 57 51 52 51 43V27C51 22 52 17 54 12C49.5 13.5 45.5 16 42.5 19.5C39.5 18.3 35.8 17.8 32 17.8C28.2 17.8 24.5 18.3 21.5 19.5C18.5 16 14.5 13.5 10 12C12 17 13 22 13 27Z" fill="${fill}" ${ink(3)}/>`,
-    back: nothing,
+      `<path d="M11 30C11 20 19.5 14 32 14C44.5 14 53 20 53 30C53 45 45 56.5 32 56.5C19 56.5 11 45 11 30Z" fill="${fill}" ${ink(3)}/>`,
+    back: (p) =>
+      `<path d="M1 66C2 56 12 50.5 24 50H40C52 50.5 62 56 63 66Z" fill="${INK}" ${ink(3)}/>` +
+      `<path d="M13 52.5L16.5 66H22.5L19 51Z" fill="${p.detail}" ${ink(2)}/>` +
+      `<path d="M51 52.5L47.5 66H41.5L45 51Z" fill="${p.detail}" ${ink(2)}/>` +
+      `<path d="M14 24L10 9L15.5 13.5L17 6.5L21.5 15L24 10.5L25 18Z" fill="${p.pattern}" ${ink(2)}/>` +
+      `<path d="M50 24L54 9L48.5 13.5L47 6.5L42.5 15L40 10.5L39 18Z" fill="${p.pattern}" ${ink(2)}/>`,
     skin: (p) =>
-      `<path d="M32 27C29 23.5 25 22.5 21.5 23.5C17 25 15.5 30 16.5 34.5C17.5 39.5 22 42.5 27 42C29.5 41.8 31 41 32 40C33 41 34.5 41.8 37 42C42 42.5 46.5 39.5 47.5 34.5C48.5 30 47 25 42.5 23.5C39 22.5 35 23.5 32 27Z" fill="${p.accent}"/>` +
-      `<ellipse cx="32" cy="51.5" rx="8.5" ry="4.5" fill="${p.accent}"/>` +
-      `<path d="M27.5 50L29 51.5L30.5 50M33.5 50L35 51.5L36.5 50M30.5 53L32 54.5L33.5 53" fill="none" stroke="${p.body}" stroke-width="1.3"/>`,
+      `<circle cx="24" cy="33" r="8.6" fill="${p.accent}"/>` +
+      `<circle cx="40" cy="33" r="8.6" fill="${p.accent}"/>` +
+      `<path d="M27.5 20L29.8 22.2L32 20L34.2 22.2L36.5 20" fill="none" stroke="${p.pattern}" stroke-width="1.4"/>`,
     eyes: (p) =>
-      `<circle cx="25" cy="32.5" r="6" fill="${WHITE}" ${ink(2.5)}/>` +
-      `<circle cx="39" cy="32.5" r="6" fill="${WHITE}" ${ink(2.5)}/>` +
-      `<circle cx="25.6" cy="33" r="3.6" fill="${p.detail}"/>` +
-      `<circle cx="38.4" cy="33" r="3.6" fill="${p.detail}"/>` +
-      `<circle cx="25.6" cy="33" r="2" fill="${INK}"/>` +
-      `<circle cx="38.4" cy="33" r="2" fill="${INK}"/>` +
-      `<circle cx="26.4" cy="32" r="0.8" fill="${WHITE}"/>` +
-      `<circle cx="39.2" cy="32" r="0.8" fill="${WHITE}"/>`,
-    mouth: (p) => `<path d="M29 39.5H35L32 45Z" fill="${p.detail}" ${ink(2)}/>`,
+      `<circle cx="24" cy="33.5" r="5" fill="${p.detail}" ${ink(2)}/>` +
+      `<circle cx="40" cy="33.5" r="5" fill="${p.detail}" ${ink(2)}/>` +
+      `<circle cx="24.6" cy="34" r="2.5" fill="${INK}"/>` +
+      `<circle cx="39.4" cy="34" r="2.5" fill="${INK}"/>` +
+      `<circle cx="25.4" cy="33.1" r="0.9" fill="${WHITE}"/>` +
+      `<circle cx="40.2" cy="33.1" r="0.9" fill="${WHITE}"/>` +
+      `<path d="M15.5 24.8L31.5 29.6L31 32.4L15.8 27.6Z" fill="${INK}"/>` +
+      `<path d="M48.5 24.8L32.5 29.6L33 32.4L48.2 27.6Z" fill="${INK}"/>`,
+    mouth: () => `<path d="M28.8 37.5C29.5 35.8 34.5 35.8 35.2 37.5L32.6 45.5C32.3 46.3 31.7 46.3 31.4 45.5Z" fill="${INK}"/>`,
     front: nothing,
-    pattern: PATTERNS.dots,
-    colors: { bg: '#3B6E8F', pattern: '#4A7FA1', body: '#3E434D', accent: '#9AA3B1', detail: '#FFB627' },
+    // A plain backdrop, as in the reference; the pattern color is the dark brown of the tufts.
+    pattern: nothing,
+    colors: { bg: '#7FC3D9', pattern: '#4A3322', body: '#8A6239', accent: '#E3DDCF', detail: '#F2C230' },
   },
   // Markiplier: the hair, the black shirt and the pink mustache.
   markiplier: {
@@ -79,15 +87,19 @@ export const TRIBUTES = Object.freeze({
     pattern: PATTERNS.stripes,
     colors: { bg: '#E23B3B', pattern: '#CC2F2F', body: '#F3C9A8', accent: '#1C1C22', detail: '#FF4F9E' },
   },
-  // A Creeper, for Minecraft: the blocky green face, square eyes and that mouth.
+  // A Creeper, for Minecraft: the blocky green face, square eyes and that mouth,
+  // on a blocky neck.
   minecraft: {
-    shape: (fill) => `<rect x="12" y="14" width="40" height="40" fill="${fill}" ${ink(3)}/>`,
-    back: nothing,
+    shape: (fill) => `<rect x="12" y="8" width="40" height="40" fill="${fill}" ${ink(3)}/>`,
+    back: (p) =>
+      `<path d="M17 46H47V66H17Z" fill="${p.body}" ${ink(3)}/>` +
+      pixels([[0, 2], [1, 5], [2, 1], [3, 4]], p.accent, 48) +
+      pixels([[0, 5], [1, 2], [2, 4], [3, 1]], p.detail, 48),
     skin: (p) =>
       pixels([[0, 1], [0, 5], [1, 3], [2, 7], [3, 0], [3, 6], [4, 1], [5, 7], [6, 0], [6, 4], [7, 2], [7, 6]], p.accent) +
       pixels([[0, 3], [0, 7], [1, 0], [2, 4], [3, 2], [4, 6], [5, 0], [6, 3], [6, 7], [7, 0], [7, 4]], p.detail),
-    eyes: () => `<path d="M17 19H27V29H17ZM37 19H47V29H37Z" fill="${INK}"/>`,
-    mouth: () => `<path d="M27 29H37V34H42V49H37V44H27V49H22V34H27Z" fill="${INK}"/>`,
+    eyes: () => `<path d="M17 13H27V23H17ZM37 13H47V23H37Z" fill="${INK}"/>`,
+    mouth: () => `<path d="M27 23H37V28H42V43H37V38H27V43H22V28H27Z" fill="${INK}"/>`,
     front: nothing,
     pattern: PATTERNS.grid,
     colors: { bg: '#86C8F0', pattern: '#74B6DE', body: '#5DBB46', accent: '#3E8E2F', detail: '#8FD96B' },
@@ -95,7 +107,6 @@ export const TRIBUTES = Object.freeze({
 });
 
 export const TRIBUTE_NAMES = Object.freeze(Object.keys(TRIBUTES));
-
 
 /** The guest a typed name summons, ignoring case and surrounding spaces, or null. */
 export function matchTribute(input) {
